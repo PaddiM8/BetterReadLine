@@ -2,9 +2,9 @@
 using System.Linq;
 using Xunit;
 
-using static ReadLine.ReadLine;
+using static BetterReadLine.ReadLine;
 
-namespace ReadLine.Tests
+namespace BetterReadLine.Tests
 {
     public class ReadLineTests : IDisposable
     {

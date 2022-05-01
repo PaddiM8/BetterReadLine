@@ -1,4 +1,4 @@
-namespace ReadLine;
+namespace BetterReadLine;
 
 public interface IAutoCompleteHandler
 {

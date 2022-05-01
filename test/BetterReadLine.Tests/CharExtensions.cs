@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace ReadLine.Tests
+namespace BetterReadLine.Tests
 {
     public static class CharExtensions
     {

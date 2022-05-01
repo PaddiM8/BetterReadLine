@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <DebugType>portable</DebugType>
-    <AssemblyName>ReadLine.Demo</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>ReadLine.Demo</PackageId>
+    <PackageId>BetterReadLine.Demo</PackageId>
     <LangVersion>10</LangVersion>
+    <RootNamespace>BetterReadLine.Demo</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../ReadLine/ReadLine.csproj" />
+    <ProjectReference Include="..\BetterReadLine\BetterReadLine.csproj" />
   </ItemGroup>
 
 </Project>

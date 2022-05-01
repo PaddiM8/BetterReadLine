@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using ReadLine.Abstractions;
+using BetterReadLine.Abstractions;
 
-namespace ReadLine;
+namespace BetterReadLine;
 
 public readonly struct KeyPress
 {

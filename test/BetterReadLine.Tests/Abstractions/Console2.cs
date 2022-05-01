@@ -1,6 +1,6 @@
-using ReadLine.Abstractions;
+using BetterReadLine.Abstractions;
 
-namespace ReadLine.Tests.Abstractions
+namespace BetterReadLine.Tests.Abstractions
 {
     internal class Console2 : IConsole
     {

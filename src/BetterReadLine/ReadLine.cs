@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using ReadLine.Abstractions;
+using BetterReadLine.Abstractions;
 
-namespace ReadLine;
+namespace BetterReadLine;
 
 public static class ReadLine
 {
