@@ -287,6 +287,8 @@ namespace Internal.ReadLine
             };
             _keyActions["ControlW"] = () =>
             {
+                while (!IsStartOfLine() && _text[_cursorPos - 1] == ' ')
+                    Backspace();
                 while (!IsStartOfLine() && _text[_cursorPos - 1] != ' ')
                     Backspace();
             };
