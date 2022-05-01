@@ -64,6 +64,8 @@ internal class KeyHandler
         {
             [new(ConsoleKey.LeftArrow)] = MoveCursorLeft,
             [new(ConsoleKey.RightArrow)] = MoveCursorRight,
+            [new(ConsoleModifiers.Control, ConsoleKey.LeftArrow)] = MoveCursorWordLeft,
+            [new(ConsoleModifiers.Control, ConsoleKey.RightArrow)] = MoveCursorWordRight,
             [new(ConsoleKey.UpArrow)] = PrevHistory,
             [new(ConsoleKey.DownArrow)] = NextHistory,
             [new(ConsoleKey.Home)] = MoveCursorHome,
@@ -82,7 +84,7 @@ internal class KeyHandler
             [new(ConsoleModifiers.Control, ConsoleKey.P)] = PrevHistory,
             [new(ConsoleModifiers.Control, ConsoleKey.T)] = TransposeChars,
             [new(ConsoleModifiers.Control, ConsoleKey.U)] = RemoveToHome,
-            [new(ConsoleModifiers.Control, ConsoleKey.W)] = RemoveWord,
+            [new(ConsoleModifiers.Control, ConsoleKey.W)] = RemoveWordLeft,
             [new(ConsoleKey.Tab)] = NextAutoComplete,
             [new(ConsoleModifiers.Shift, ConsoleKey.Tab)] = PreviousAutoComplete,
         };
@@ -177,6 +179,24 @@ internal class KeyHandler
             MoveCursorRight();
     }
 
+    private void MoveCursorWordLeft()
+    {
+        while (!IsStartOfLine && _text[_cursorPos - 1] == ' ')
+            MoveCursorLeft();
+        while (!IsStartOfLine && _text[_cursorPos - 1] != ' ')
+            MoveCursorLeft();
+    }
+    
+    private void MoveCursorWordRight()
+    {
+        while (_cursorPos + 1 < _text.Length && _text[_cursorPos + 1] == ' ')
+            MoveCursorRight();
+        while (_cursorPos + 1 < _text.Length && _text[_cursorPos + 1] != ' ')
+            MoveCursorRight();
+        
+        MoveCursorRight();
+    }
+
     private void NextAutoComplete()
     {
         if (IsInAutoCompleteMode)
@@ -261,14 +281,14 @@ internal class KeyHandler
             Backspace();
     }
     
-    private void RemoveWord()
+    private void RemoveWordLeft()
     {
         while (!IsStartOfLine && _text[_cursorPos - 1] == ' ')
             Backspace();
         while (!IsStartOfLine && _text[_cursorPos - 1] != ' ')
             Backspace();
     }
-
+    
     private void ResetAutoComplete()
     {
         _completions = null;
