@@ -1,4 +1,4 @@
-using Internal.ReadLine.Abstractions;
+using ReadLine.Abstractions;
 
 namespace ReadLine.Tests.Abstractions
 {

@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Xunit;
-
-using ReadLine.Tests.Abstractions;
 using Internal.ReadLine;
-
+using ReadLine.Abstractions;
 using static ReadLine.Tests.ConsoleKeyInfoExtensions;
+using Console2 = ReadLine.Tests.Abstractions.Console2;
 
 namespace ReadLine.Tests
 {
@@ -17,7 +16,7 @@ namespace ReadLine.Tests
         private List<string> _history;
         private AutoCompleteHandler _autoCompleteHandler;
         private string[] _completions;
-        private Internal.ReadLine.Abstractions.IConsole _console;
+        private IConsole _console;
 
         public KeyHandlerTests()
         {

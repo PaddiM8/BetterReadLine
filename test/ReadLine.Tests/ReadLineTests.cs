@@ -2,7 +2,7 @@
 using System.Linq;
 using Xunit;
 
-using static System.ReadLine;
+using static ReadLine.ReadLine;
 
 namespace ReadLine.Tests
 {

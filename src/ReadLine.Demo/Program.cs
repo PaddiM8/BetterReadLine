@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConsoleApplication
+namespace ReadLine.Demo
 {
     public class Program
     {
@@ -10,7 +10,7 @@ namespace ConsoleApplication
             Console.WriteLine("---------------------");
             Console.WriteLine();
 
-            string[] history = new string[] { "ls -a", "dotnet run", "git init" };
+            string[] history = { "ls -a", "dotnet run", "git init" };
             ReadLine.AddHistory(history);
 
             ReadLine.AutoCompletionHandler = new AutoCompletionHandler();
@@ -25,13 +25,11 @@ namespace ConsoleApplication
 
     class AutoCompletionHandler : IAutoCompleteHandler
     {
-        public char[] Separators { get; set; } = new char[] { ' ', '.', '/', '\\', ':' };
+        public char[] Separators { get; set; } = { ' ', '.', '/', '\\', ':' };
+        
         public string[] GetSuggestions(string text, int index)
         {
-            if (text.StartsWith("git "))
-                return new string[] { "init", "clone", "pull", "push" };
-            else
-                return null;
+            return text.StartsWith("git ") ? new[] { "init", "clone", "pull", "push" } : null;
         }
     }
 }
