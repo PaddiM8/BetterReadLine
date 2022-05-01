@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using BetterReadLine.Abstractions;
 
@@ -24,19 +25,22 @@ public readonly struct KeyPress
     }
 }
 
-internal class KeyHandler
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+public class KeyHandler
 {
 
-    private bool IsEndOfBuffer => _console2.CursorLeft == _console2.BufferWidth - 1;
+    public bool IsEndOfBuffer => _console2.CursorLeft == _console2.BufferWidth - 1;
     
-    private bool IsEndOfLine => _cursorPos == _cursorLimit;
+    public bool IsEndOfLine => _cursorPos == _cursorLimit;
     
-    private bool IsInAutoCompleteMode => _completions != null;
+    public bool IsInAutoCompleteMode => _completions != null;
 
-    private bool IsStartOfBuffer => _console2.CursorLeft == 0;
+    public bool IsStartOfBuffer => _console2.CursorLeft == 0;
 
-    private bool IsStartOfLine => _cursorPos == 0;
+    public bool IsStartOfLine => _cursorPos == 0;
 
+    public int CursorPos => _cursorPos;
+    
     public string Text => _text.ToString();
     
     private int _cursorPos;
@@ -45,22 +49,24 @@ internal class KeyHandler
     private readonly List<string> _history;
     private int _historyIndex;
     private ConsoleKeyInfo _keyInfo;
-    private readonly Dictionary<KeyPress, Action> _keyActions;
+    private readonly Dictionary<KeyPress, Action> _defaultShortcuts;
     private readonly IAutoCompleteHandler? _autoCompleteHandler;
+    private readonly ShortcutBag? _shortcuts;
     private string[]? _completions;
     private int _completionStart;
     private int _completionsIndex;
     private readonly IConsole _console2;
 
-    public KeyHandler(IConsole console, List<string>? history, IAutoCompleteHandler? autoCompleteHandler)
+    internal KeyHandler(IConsole console, List<string>? history, IAutoCompleteHandler? autoCompleteHandler, ShortcutBag? shortcuts)
     {
         _console2 = console;
 
         _history = history ?? new List<string>();
         _historyIndex = _history.Count;
         _autoCompleteHandler = autoCompleteHandler;
+        _shortcuts = shortcuts;
         _text = new StringBuilder();
-        _keyActions = new Dictionary<KeyPress, Action>
+        _defaultShortcuts = new Dictionary<KeyPress, Action>
         {
             [new(ConsoleKey.LeftArrow)] = MoveCursorLeft,
             [new(ConsoleKey.RightArrow)] = MoveCursorRight,
@@ -90,7 +96,7 @@ internal class KeyHandler
         };
     }
 
-    public void Handle(ConsoleKeyInfo keyInfo)
+    internal void Handle(ConsoleKeyInfo keyInfo)
     {
         _keyInfo = keyInfo;
 
@@ -98,12 +104,18 @@ internal class KeyHandler
         if (IsInAutoCompleteMode && _keyInfo.Key != ConsoleKey.Tab)
             ResetAutoComplete();
 
-        _keyActions.TryGetValue(new(keyInfo.Modifiers, keyInfo.Key), out var action);
-        action ??= WriteChar;
-        action.Invoke();
+        if (_shortcuts?.TryGetValue(new(keyInfo.Modifiers, keyInfo.Key), out var action1) ?? false)
+        {
+            action1?.Invoke(this);
+            return;
+        }
+        
+        _defaultShortcuts.TryGetValue(new(keyInfo.Modifiers, keyInfo.Key), out var action2);
+        action2 ??= WriteChar;
+        action2.Invoke();
     }
 
-    private void Backspace()
+    public void Backspace()
     {
         if (IsStartOfLine)
             return;
@@ -119,14 +131,14 @@ internal class KeyHandler
         _cursorLimit--;
     }
 
-    private void ClearLine()
+    public void ClearLine()
     {
         MoveCursorEnd();
         while (!IsStartOfLine)
             Backspace();
     }
 
-    private void Delete()
+    public void Delete()
     {
         if (IsEndOfLine)
             return;
@@ -141,7 +153,7 @@ internal class KeyHandler
         _cursorLimit--;
     }
 
-    private void MoveCursorLeft()
+    public void MoveCursorLeft()
     {
         if (IsStartOfLine)
             return;
@@ -154,13 +166,13 @@ internal class KeyHandler
         _cursorPos--;
     }
 
-    private void MoveCursorHome()
+    public void MoveCursorHome()
     {
         while (!IsStartOfLine)
             MoveCursorLeft();
     }
 
-    private void MoveCursorRight()
+    public void MoveCursorRight()
     {
         if (IsEndOfLine)
             return;
@@ -173,13 +185,13 @@ internal class KeyHandler
         _cursorPos++;
     }
 
-    private void MoveCursorEnd()
+    public void MoveCursorEnd()
     {
         while (!IsEndOfLine)
             MoveCursorRight();
     }
 
-    private void MoveCursorWordLeft()
+    public void MoveCursorWordLeft()
     {
         while (!IsStartOfLine && _text[_cursorPos - 1] == ' ')
             MoveCursorLeft();
@@ -187,7 +199,7 @@ internal class KeyHandler
             MoveCursorLeft();
     }
     
-    private void MoveCursorWordRight()
+    public void MoveCursorWordRight()
     {
         while (_cursorPos + 1 < _text.Length && _text[_cursorPos + 1] == ' ')
             MoveCursorRight();
@@ -197,7 +209,7 @@ internal class KeyHandler
         MoveCursorRight();
     }
 
-    private void NextAutoComplete()
+    public void NextAutoComplete()
     {
         if (IsInAutoCompleteMode)
         {
@@ -230,7 +242,7 @@ internal class KeyHandler
         StartAutoComplete();
     }
 
-    private void NextHistory()
+    public void NextHistory()
     {
         if (_historyIndex < _history.Count)
         {
@@ -242,7 +254,7 @@ internal class KeyHandler
         }
     }
 
-    private void PreviousAutoComplete()
+    public void PreviousAutoComplete()
     {
         if (!IsInAutoCompleteMode)
             return;
@@ -258,7 +270,7 @@ internal class KeyHandler
         WriteString(_completions![_completionsIndex]);
     }
 
-    private void PrevHistory()
+    public void PrevHistory()
     {
         if (_historyIndex > 0)
         {
@@ -267,7 +279,7 @@ internal class KeyHandler
         }
     }
 
-    private void RemoveToEnd()
+    public void RemoveToEnd()
     {
         int pos = _cursorPos;
         MoveCursorEnd();
@@ -275,13 +287,13 @@ internal class KeyHandler
             Backspace();
     }
     
-    private void RemoveToHome()
+    public void RemoveToHome()
     {
         while (!IsStartOfLine)
             Backspace();
     }
     
-    private void RemoveWordLeft()
+    public void RemoveWordLeft()
     {
         while (!IsStartOfLine && _text[_cursorPos - 1] == ' ')
             Backspace();
@@ -289,13 +301,13 @@ internal class KeyHandler
             Backspace();
     }
     
-    private void ResetAutoComplete()
+    public void ResetAutoComplete()
     {
         _completions = null;
         _completionsIndex = 0;
     }
 
-    private void StartAutoComplete()
+    public void StartAutoComplete()
     {
         while (_cursorPos > _completionStart)
             Backspace();
@@ -305,7 +317,7 @@ internal class KeyHandler
         WriteString(_completions![_completionsIndex]);
     }
 
-    private void TransposeChars()
+    public void TransposeChars()
     {
         // local helper functions
         bool AlmostEndOfLine() => (_cursorLimit - _cursorPos) == 1;
@@ -330,22 +342,22 @@ internal class KeyHandler
         MoveCursorRight();
     }
 
-    private void WriteNewString(string str)
+    public void WriteNewString(string str)
     {
         ClearLine();
         foreach (char character in str)
             WriteChar(character);
     }
 
-    private void WriteString(string str)
+    public void WriteString(string str)
     {
         foreach (char character in str)
             WriteChar(character);
     }
 
-    private void WriteChar() => WriteChar(_keyInfo.KeyChar);
+    public void WriteChar() => WriteChar(_keyInfo.KeyChar);
 
-    private void WriteChar(char c)
+    public void WriteChar(char c)
     {
         if (IsEndOfLine)
         {

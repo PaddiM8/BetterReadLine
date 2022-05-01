@@ -19,6 +19,10 @@ public class ReadLine
     
     private List<string> _history;
 
+    private KeyHandler? _keyHandler;
+
+    private ShortcutBag _shortcuts = new();
+
     public ReadLine()
     {
         _history = new List<string>();
@@ -27,8 +31,8 @@ public class ReadLine
     public string Read(string prompt = "", string @default = "")
     {
         Console.Write(prompt);
-        var keyHandler = new KeyHandler(new Console2(), _history, AutoCompletionHandler);
-        string text = GetText(keyHandler);
+        _keyHandler = new KeyHandler(new Console2(), _history, AutoCompletionHandler, _shortcuts);
+        string text = GetText();
 
         if (string.IsNullOrWhiteSpace(text) && !string.IsNullOrWhiteSpace(@default))
         {
@@ -46,20 +50,26 @@ public class ReadLine
     public string ReadPassword(string prompt = "")
     {
         Console.Write(prompt);
-        var keyHandler = new KeyHandler(new Console2() { PasswordMode = true }, null, null);
-        return GetText(keyHandler);
+        _keyHandler = new KeyHandler(new Console2() { PasswordMode = true }, null, null, _shortcuts);
+        
+        return GetText();
     }
 
-    private string GetText(KeyHandler keyHandler)
+    public void RegisterShortcut(KeyPress keyPress, Action<KeyHandler> action)
+    {
+        _shortcuts.Add(keyPress, action);
+    }
+
+    private string GetText()
     {
         var keyInfo = Console.ReadKey(true);
         while (keyInfo.Key != ConsoleKey.Enter)
         {
-            keyHandler.Handle(keyInfo);
+            _keyHandler!.Handle(keyInfo);
             keyInfo = Console.ReadKey(true);
         }
 
         Console.WriteLine();
-        return keyHandler.Text;
+        return _keyHandler!.Text;
     }
 }

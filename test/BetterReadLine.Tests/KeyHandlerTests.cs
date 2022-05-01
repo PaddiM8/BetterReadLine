@@ -23,7 +23,7 @@ public class KeyHandlerTests
         _history = new List<string>(new[] { "dotnet run", "git init", "clear" });
 
         _console = new BetterReadLine.Tests.Abstractions.Console2();
-        _keyHandler = new KeyHandler(_console, _history, null);
+        _keyHandler = new KeyHandler(_console, _history, null, null);
 
         "Hello".Select(c => c.ToConsoleKeyInfo())
             .ToList()
@@ -312,7 +312,7 @@ public class KeyHandlerTests
         // Nothing happens when no auto complete handler is set
         Assert.Equal("Hello", _keyHandler.Text);
 
-        _keyHandler = new KeyHandler(new BetterReadLine.Tests.Abstractions.Console2(), _history, _autoCompleteHandler);
+        _keyHandler = new KeyHandler(new BetterReadLine.Tests.Abstractions.Console2(), _history, _autoCompleteHandler, null);
 
         "Hi ".Select(c => c.ToConsoleKeyInfo()).ToList().ForEach(_keyHandler.Handle);
 
@@ -330,7 +330,7 @@ public class KeyHandlerTests
         // Nothing happens when no auto complete handler is set
         Assert.Equal("Hello", _keyHandler.Text);
 
-        _keyHandler = new KeyHandler(new BetterReadLine.Tests.Abstractions.Console2(), _history, _autoCompleteHandler);
+        _keyHandler = new KeyHandler(new BetterReadLine.Tests.Abstractions.Console2(), _history, _autoCompleteHandler, null);
 
         "Hi ".Select(c => c.ToConsoleKeyInfo()).ToList().ForEach(_keyHandler.Handle);
 
