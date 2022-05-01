@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Xunit;
-using Internal.ReadLine;
 using ReadLine.Abstractions;
 using static ReadLine.Tests.ConsoleKeyInfoExtensions;
 using Console2 = ReadLine.Tests.Abstractions.Console2;
@@ -13,16 +12,16 @@ namespace ReadLine.Tests
     public class KeyHandlerTests
     {
         private KeyHandler _keyHandler;
-        private List<string> _history;
-        private AutoCompleteHandler _autoCompleteHandler;
-        private string[] _completions;
-        private IConsole _console;
+        private readonly List<string> _history;
+        private readonly AutoCompleteHandler _autoCompleteHandler;
+        private readonly string[] _completions;
+        private readonly IConsole _console;
 
         public KeyHandlerTests()
         {
             _autoCompleteHandler = new AutoCompleteHandler();
             _completions = _autoCompleteHandler.GetSuggestions("", 0);
-            _history = new List<string>(new string[] { "dotnet run", "git init", "clear" });
+            _history = new List<string>(new[] { "dotnet run", "git init", "clear" });
 
             _console = new Console2();
             _keyHandler = new KeyHandler(_console, _history, null);
