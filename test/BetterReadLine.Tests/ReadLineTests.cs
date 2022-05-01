@@ -8,39 +8,41 @@ namespace BetterReadLine.Tests
 {
     public class ReadLineTests : IDisposable
     {
+        private ReadLine _readLine = new();
+        
         public ReadLineTests()
         {
             string[] history = new string[] { "ls -a", "dotnet run", "git init" };
-            AddHistory(history);
+            _readLine.AddHistory(history);
         }
 
         [Fact]
         public void TestNoInitialHistory() 
         {
-            Assert.Equal(3, GetHistory().Count);
+            Assert.Equal(3, _readLine.GetHistory().Count);
         }
 
         [Fact]
         public void TestUpdatesHistory() 
         {
-            AddHistory("mkdir");
-            Assert.Equal(4, GetHistory().Count);
-            Assert.Equal("mkdir", GetHistory().Last());
+            _readLine.AddHistory("mkdir");
+            Assert.Equal(4, _readLine.GetHistory().Count);
+            Assert.Equal("mkdir", _readLine.GetHistory().Last());
         }
 
         [Fact]
         public void TestGetCorrectHistory() 
         {
-            Assert.Equal("ls -a", GetHistory()[0]);
-            Assert.Equal("dotnet run", GetHistory()[1]);
-            Assert.Equal("git init", GetHistory()[2]);
+            Assert.Equal("ls -a", _readLine.GetHistory()[0]);
+            Assert.Equal("dotnet run", _readLine.GetHistory()[1]);
+            Assert.Equal("git init", _readLine.GetHistory()[2]);
         }
 
         public void Dispose()
         {
             // If all above tests pass
             // clear history works
-            ClearHistory();
+            _readLine.ClearHistory();
         }
     }
 }

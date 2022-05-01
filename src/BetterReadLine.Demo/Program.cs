@@ -10,15 +10,16 @@ public class Program
         Console.WriteLine("---------------------");
         Console.WriteLine();
 
+        var readLine = new ReadLine();
         string[] history = { "ls -a", "dotnet run", "git init" };
-        ReadLine.AddHistory(history);
+        readLine.AddHistory(history);
 
-        ReadLine.AutoCompletionHandler = new AutoCompletionHandler();
+        readLine.AutoCompletionHandler = new AutoCompletionHandler();
 
-        string input = ReadLine.Read("(prompt)> ");
+        string input = readLine.Read("(prompt)> ");
         Console.WriteLine(input);
 
-        input = ReadLine.ReadPassword("Enter Password> ");
+        input = readLine.ReadPassword("Enter Password> ");
         Console.WriteLine(input);
     }
 }

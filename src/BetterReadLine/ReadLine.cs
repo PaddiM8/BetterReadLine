@@ -4,27 +4,27 @@ using BetterReadLine.Abstractions;
 
 namespace BetterReadLine;
 
-public static class ReadLine
+public class ReadLine
 {
 
-    public static void AddHistory(params string[] text) => _history.AddRange(text);
+    public void AddHistory(params string[] text) => _history.AddRange(text);
         
-    public static List<string> GetHistory() => _history;
+    public List<string> GetHistory() => _history;
         
-    public static void ClearHistory() => _history = new List<string>();
+    public void ClearHistory() => _history = new List<string>();
         
-    public static bool HistoryEnabled { get; set; }
+    public bool HistoryEnabled { get; set; }
         
-    public static IAutoCompleteHandler? AutoCompletionHandler { private get; set; }
+    public IAutoCompleteHandler? AutoCompletionHandler { private get; set; }
     
-    private static List<string> _history;
+    private List<string> _history;
 
-    static ReadLine()
+    public ReadLine()
     {
         _history = new List<string>();
     }
 
-    public static string Read(string prompt = "", string @default = "")
+    public string Read(string prompt = "", string @default = "")
     {
         Console.Write(prompt);
         var keyHandler = new KeyHandler(new Console2(), _history, AutoCompletionHandler);
@@ -43,14 +43,14 @@ public static class ReadLine
         return text;
     }
 
-    public static string ReadPassword(string prompt = "")
+    public string ReadPassword(string prompt = "")
     {
         Console.Write(prompt);
         var keyHandler = new KeyHandler(new Console2() { PasswordMode = true }, null, null);
         return GetText(keyHandler);
     }
 
-    private static string GetText(KeyHandler keyHandler)
+    private string GetText(KeyHandler keyHandler)
     {
         var keyInfo = Console.ReadKey(true);
         while (keyInfo.Key != ConsoleKey.Enter)
