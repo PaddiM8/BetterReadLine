@@ -225,7 +225,7 @@ public class KeyHandler
             return;
         }
 
-        if (_autoCompleteHandler == null || !IsEndOfLine)
+        if (_autoCompleteHandler == null)
             return;
 
         string text = _text.ToString();
