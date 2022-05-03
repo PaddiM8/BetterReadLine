@@ -19,7 +19,7 @@ public class KeyHandlerTests
     public KeyHandlerTests()
     {
         _autoCompleteHandler = new AutoCompleteHandler();
-        _completions = _autoCompleteHandler.GetSuggestions("", 0);
+        _completions = _autoCompleteHandler.GetSuggestions("", 0, 0);
         _history = new List<string>(new[] { "dotnet run", "git init", "clear" });
 
         _console = new BetterReadLine.Tests.Abstractions.Console2();

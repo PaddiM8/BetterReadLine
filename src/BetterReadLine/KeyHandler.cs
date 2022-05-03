@@ -229,11 +229,8 @@ public class KeyHandler
             return;
 
         string text = _text.ToString();
-
-        _completionStart = text.LastIndexOfAny(_autoCompleteHandler.Separators);
-        _completionStart = _completionStart == -1 ? 0 : _completionStart + 1;
-
-        _completions = _autoCompleteHandler.GetSuggestions(text, _completionStart);
+        _completionStart = _autoCompleteHandler.GetCompletionStart(text, _cursorPos);
+        _completions = _autoCompleteHandler.GetSuggestions(text, _completionStart, _cursorPos);
         _completions = _completions?.Length == 0 ? null : _completions;
 
         if (_completions == null)
