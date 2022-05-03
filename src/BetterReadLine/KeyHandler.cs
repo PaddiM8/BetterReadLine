@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 using BetterReadLine.Abstractions;
 
@@ -42,7 +43,9 @@ public class KeyHandler
     public int CursorPos => _cursorPos;
     
     public string Text => _text.ToString();
-    
+
+    public char[] WordSeparators = { ' ' };
+
     private int _cursorPos;
     private int _cursorLimit;
     private readonly StringBuilder _text;
@@ -193,19 +196,19 @@ public class KeyHandler
 
     public void MoveCursorWordLeft()
     {
-        while (!IsStartOfLine && _text[_cursorPos - 1] == ' ')
+        while (!IsStartOfLine && WordSeparators.Contains(_text[_cursorPos - 1]))
             MoveCursorLeft();
-        while (!IsStartOfLine && _text[_cursorPos - 1] != ' ')
+        while (!IsStartOfLine && !WordSeparators.Contains(_text[_cursorPos - 1]))
             MoveCursorLeft();
     }
     
     public void MoveCursorWordRight()
     {
-        while (_cursorPos + 1 < _text.Length && _text[_cursorPos + 1] == ' ')
+        while (_cursorPos + 1 < _text.Length && WordSeparators.Contains(_text[_cursorPos + 1]))
             MoveCursorRight();
-        while (_cursorPos + 1 < _text.Length && _text[_cursorPos + 1] != ' ')
+        while (_cursorPos + 1 < _text.Length && !WordSeparators.Contains(_text[_cursorPos + 1]))
             MoveCursorRight();
-        
+
         MoveCursorRight();
     }
 
@@ -292,9 +295,9 @@ public class KeyHandler
     
     public void RemoveWordLeft()
     {
-        while (!IsStartOfLine && _text[_cursorPos - 1] == ' ')
+        while (!IsStartOfLine && WordSeparators.Contains(_text[_cursorPos - 1]))
             Backspace();
-        while (!IsStartOfLine && _text[_cursorPos - 1] != ' ')
+        while (!IsStartOfLine && !WordSeparators.Contains(_text[_cursorPos - 1]))
             Backspace();
     }
     

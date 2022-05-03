@@ -16,6 +16,8 @@ public class ReadLine
     public bool HistoryEnabled { get; set; }
         
     public IAutoCompleteHandler? AutoCompletionHandler { private get; set; }
+
+    public char[]? WordSeparators { get; set; }
     
     private List<string> _history;
 
@@ -32,6 +34,10 @@ public class ReadLine
     {
         Console.Write(prompt);
         _keyHandler = new KeyHandler(new Console2(), _history, AutoCompletionHandler, _shortcuts);
+
+        if (WordSeparators != null)
+            _keyHandler.WordSeparators = WordSeparators;
+
         string text = GetText();
 
         if (string.IsNullOrWhiteSpace(text) && !string.IsNullOrWhiteSpace(@default))
