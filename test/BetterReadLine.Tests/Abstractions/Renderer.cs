@@ -1,8 +1,8 @@
-using BetterReadLine.Abstractions;
+using BetterReadLine.Render;
 
 namespace BetterReadLine.Tests.Abstractions
 {
-    internal class Console2 : IConsole
+    internal class Renderer : IRenderer
     {
         public int CursorLeft => _cursorLeft;
 
@@ -17,7 +17,7 @@ namespace BetterReadLine.Tests.Abstractions
         private int _bufferWidth;
         private int _bufferHeight;
 
-        public Console2()
+        public Renderer()
         {
             _cursorLeft = 0;
             _cursorTop = 0;

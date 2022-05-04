@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using BetterReadLine.Abstractions;
+using BetterReadLine.Render;
 
 namespace BetterReadLine;
 
@@ -17,13 +17,15 @@ public class ReadLine
         
     public IAutoCompleteHandler? AutoCompletionHandler { private get; set; }
 
+    public IHighlightHandler? HighlightHandler { private get; set; }
+
     public char[]? WordSeparators { get; set; }
     
     private List<string> _history;
 
     private KeyHandler? _keyHandler;
 
-    private ShortcutBag _shortcuts = new();
+    private readonly ShortcutBag _shortcuts = new();
 
     public ReadLine()
     {
@@ -33,7 +35,11 @@ public class ReadLine
     public string Read(string prompt = "", string @default = "")
     {
         Console.Write(prompt);
-        _keyHandler = new KeyHandler(new Console2(), _history, AutoCompletionHandler, _shortcuts);
+        _keyHandler = new KeyHandler(new Renderer(), _history, _shortcuts)
+        {
+            AutoCompleteHandler = AutoCompletionHandler,
+            HighlightHandler = HighlightHandler,
+        };
 
         if (WordSeparators != null)
             _keyHandler.WordSeparators = WordSeparators;
@@ -56,7 +62,7 @@ public class ReadLine
     public string ReadPassword(string prompt = "")
     {
         Console.Write(prompt);
-        _keyHandler = new KeyHandler(new Console2() { PasswordMode = true }, null, null, _shortcuts);
+        _keyHandler = new KeyHandler(new Renderer { PasswordMode = true }, null, _shortcuts);
         
         return GetText();
     }

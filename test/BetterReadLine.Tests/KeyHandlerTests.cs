@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BetterReadLine.Abstractions;
+using BetterReadLine.Render;
 using BetterReadLine.Tests;
 using Xunit;
 using static BetterReadLine.Tests.ConsoleKeyInfoExtensions;
@@ -14,7 +14,7 @@ public class KeyHandlerTests
     private readonly List<string> _history;
     private readonly AutoCompleteHandler _autoCompleteHandler;
     private readonly string[] _completions;
-    private readonly IConsole _console;
+    private readonly IRenderer _renderer;
 
     public KeyHandlerTests()
     {
@@ -22,8 +22,8 @@ public class KeyHandlerTests
         _completions = _autoCompleteHandler.GetSuggestions("", 0, 0);
         _history = new List<string>(new[] { "dotnet run", "git init", "clear" });
 
-        _console = new BetterReadLine.Tests.Abstractions.Console2();
-        _keyHandler = new KeyHandler(_console, _history, null, null);
+        _renderer = new BetterReadLine.Tests.Abstractions.Renderer();
+        _keyHandler = new KeyHandler(_renderer, _history, null);
 
         "Hello".Select(c => c.ToConsoleKeyInfo())
             .ToList()
@@ -75,23 +75,23 @@ public class KeyHandlerTests
     [Fact]
     public void TestControlT()
     {
-        var initialCursorCol = _console.CursorLeft;
+        var initialCursorCol = _renderer.CursorLeft;
         _keyHandler.Handle(CtrlT);
 
         Assert.Equal("Helol", _keyHandler.Text);
-        Assert.Equal(initialCursorCol, _console.CursorLeft);
+        Assert.Equal(initialCursorCol, _renderer.CursorLeft);
     }
 
     [Fact]
     public void TestControlT_LeftOnce_CursorMovesToEnd()
     {
-        var initialCursorCol = _console.CursorLeft;
+        var initialCursorCol = _renderer.CursorLeft;
 
         new List<ConsoleKeyInfo>() { LeftArrow, CtrlT }
             .ForEach(_keyHandler.Handle);
             
         Assert.Equal("Helol", _keyHandler.Text);
-        Assert.Equal(initialCursorCol, _console.CursorLeft);
+        Assert.Equal(initialCursorCol, _renderer.CursorLeft);
     }
 
     [Fact]
@@ -102,12 +102,12 @@ public class KeyHandlerTests
             .ToList()
             .ForEach(_keyHandler.Handle);
 
-        var initialCursorCol = _console.CursorLeft;
+        var initialCursorCol = _renderer.CursorLeft;
 
         _keyHandler.Handle(CtrlT);
 
         Assert.Equal("Hlelo", _keyHandler.Text);
-        Assert.Equal(initialCursorCol + 1, _console.CursorLeft);
+        Assert.Equal(initialCursorCol + 1, _renderer.CursorLeft);
     }
 
     [Fact]
@@ -115,12 +115,12 @@ public class KeyHandlerTests
     {
         _keyHandler.Handle(CtrlA);
 
-        var initialCursorCol = _console.CursorLeft;
+        var initialCursorCol = _renderer.CursorLeft;
 
         _keyHandler.Handle(CtrlT);
 
         Assert.Equal("Hello", _keyHandler.Text);
-        Assert.Equal(initialCursorCol, _console.CursorLeft);
+        Assert.Equal(initialCursorCol, _renderer.CursorLeft);
     }
 
     [Fact]
@@ -312,7 +312,10 @@ public class KeyHandlerTests
         // Nothing happens when no auto complete handler is set
         Assert.Equal("Hello", _keyHandler.Text);
 
-        _keyHandler = new KeyHandler(new BetterReadLine.Tests.Abstractions.Console2(), _history, _autoCompleteHandler, null);
+        _keyHandler = new KeyHandler(new BetterReadLine.Tests.Abstractions.Renderer(), _history, null)
+        {
+            AutoCompleteHandler = _autoCompleteHandler,
+        };
 
         "Hi ".Select(c => c.ToConsoleKeyInfo()).ToList().ForEach(_keyHandler.Handle);
 
@@ -330,7 +333,10 @@ public class KeyHandlerTests
         // Nothing happens when no auto complete handler is set
         Assert.Equal("Hello", _keyHandler.Text);
 
-        _keyHandler = new KeyHandler(new BetterReadLine.Tests.Abstractions.Console2(), _history, _autoCompleteHandler, null);
+        _keyHandler = new KeyHandler(new BetterReadLine.Tests.Abstractions.Renderer(), _history, null)
+        {
+            AutoCompleteHandler = _autoCompleteHandler,
+        };
 
         "Hi ".Select(c => c.ToConsoleKeyInfo()).ToList().ForEach(_keyHandler.Handle);
 
