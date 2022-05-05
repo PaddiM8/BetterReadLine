@@ -30,5 +30,7 @@ internal interface IRenderer
 
     void Insert(char c);
     
-    void Write(string value, bool moveCaret = true);
+    void Write(string value, bool moveCaret = true, int? length = null);
+
+    void WriteRaw(string value);
 }

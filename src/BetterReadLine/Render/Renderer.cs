@@ -110,9 +110,8 @@ internal class Renderer : IRenderer
         {
             _text.Insert(Caret, c);
             string newEndText = _text.ToString()[Caret..];
-            ClearLineLeft(Caret);
-            Write(newEndText, false);
-            Caret++;
+            Write($"\x1b[K{newEndText}", true, newEndText.Length);
+            Caret -= newEndText.Length - 1;
         }
     }
 
@@ -120,6 +119,8 @@ internal class Renderer : IRenderer
     {
         if (Caret - count < 0)
             count = Caret;
+        if (count == 0)
+            return;
 
         string leftoverText = Text[Caret..];
         Caret -= count;
@@ -132,7 +133,7 @@ internal class Renderer : IRenderer
     {
         if (Caret + count >= _text.Length)
             count = _text.Length - Caret;
-        if (count == 0)
+        if (count == 0 || Caret == _text.Length)
             return;
 
         string leftoverText = Text[(Caret + count)..];
@@ -141,15 +142,16 @@ internal class Renderer : IRenderer
         _text.Append(leftoverText);
     }
 
-    public void Write(string value, bool moveCaret = true)
+    public void Write(string value, bool moveCaret = true, int? length = null)
     {
-        SetPositionWithoutMoving(Caret + value.Length);
         WriteRaw(value);
+        SetPositionWithoutMoving(Caret + (length ?? value.Length));
+
         if (!moveCaret)
-            Caret -= value.Length;
+            Caret -= length ?? value.Length;
     }
 
-    private void WriteRaw(string value)
+    public void WriteRaw(string value)
     {
         if (PasswordMode)
             value = new string(default, value.Length);

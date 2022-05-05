@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
 using BetterReadLine.Render;
 
 namespace BetterReadLine;
@@ -103,10 +104,16 @@ public class KeyHandler
         action2 ??= WriteChar;
         action2.Invoke();
 
-        if (HighlightHandler != null)
+        if (HighlightHandler != null && _renderer.Text.Length > 0)
         {
-            _renderer.ClearLineLeft();
-            _renderer.Write(HighlightHandler.Highlight(_renderer.Text));
+            // This is done manually to optimise it in order to avoid flickering
+            string highlighted = HighlightHandler.Highlight(_renderer.Text);
+            int pos = _renderer.Caret;
+            string moveStart = pos > 0 ? $"\x1b[{pos}D" : "";
+            int postOffset = _renderer.Text.Length - pos;
+            string reposition = postOffset > 0 ? $"\x1b[{postOffset}D" : "";
+
+            _renderer.WriteRaw($"\x1b[?25l{moveStart}{highlighted}{reposition}\x1b[?25h");
         }
     }
 
