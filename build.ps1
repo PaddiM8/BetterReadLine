@@ -3,6 +3,6 @@ param(
 )
 
 dotnet restore
-dotnet build ".\src\ReadLine" -c $p1
-dotnet build ".\src\ReadLine.Demo" -c $p1
-dotnet build ".\test\ReadLine.Tests" -c $p1
+dotnet build ".\src\BetterReadLine" -c $p1
+dotnet build ".\src\BetterReadLine.Demo" -c $p1
+dotnet build ".\test\BetterReadLine.Tests" -c $p1
