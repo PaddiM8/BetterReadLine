@@ -14,6 +14,8 @@ internal interface IRenderer
 
     int Caret { get; set; }
 
+    bool CaretVisible { get; set; }
+
     string Text { get; }
 
     void SetCursorPosition(int left, int top);

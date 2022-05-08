@@ -201,7 +201,6 @@ public class KeyHandler
         if (_completions == null)
             return;
 
-
         StartAutoComplete();
     }
 
@@ -270,10 +269,12 @@ public class KeyHandler
 
     public void StartAutoComplete()
     {
+        _renderer.CaretVisible = false;
         _renderer.RemoveLeft(_renderer.Caret - _completionStart);
         _completionsIndex = 0;
 
         WriteString(_completions![_completionsIndex]);
+        _renderer.CaretVisible = true;
     }
 
     public void TransposeChars()

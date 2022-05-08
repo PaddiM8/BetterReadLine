@@ -58,6 +58,24 @@ internal class Renderer : IRenderer
         }
     }
 
+    public bool CaretVisible
+    {
+        get
+        {
+            return _caretVisible;
+        }
+
+        set
+        {
+            if (_caretVisible && !value)
+                WriteRaw("\x1b[?25l");
+            if (!_caretVisible && value)
+                WriteRaw("\x1b[?25h");
+
+            _caretVisible = value;
+        }
+    }
+
     public string Text => _text.ToString();
 
     private bool IsEndOfLine => Caret >= _text.Length - 1;
@@ -65,6 +83,7 @@ internal class Renderer : IRenderer
     private int _top;
     private int _left = Console.CursorLeft;
     private int _caret;
+    private bool _caretVisible = true;
     private readonly StringBuilder _text = new();
 
     public Renderer()
