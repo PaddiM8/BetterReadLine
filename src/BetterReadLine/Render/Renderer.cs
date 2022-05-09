@@ -78,7 +78,7 @@ internal class Renderer : IRenderer
 
     public string Text => _text.ToString();
 
-    private bool IsEndOfLine => Caret >= _text.Length - 1;
+    private bool IsEndOfLine => Caret >= _text.Length;
 
     private int _top;
     private int _left = Console.CursorLeft;
