@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>11</LangVersion>
     <DebugType>portable</DebugType>
     <OutputType>Exe</OutputType>
     <PackageId>BetterReadLine.Demo</PackageId>
-    <LangVersion>10</LangVersion>
     <RootNamespace>BetterReadLine.Demo</RootNamespace>
   </PropertyGroup>
 
