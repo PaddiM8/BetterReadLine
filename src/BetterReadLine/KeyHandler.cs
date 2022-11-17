@@ -66,6 +66,8 @@ public class KeyHandler
             [new(ConsoleKey.End)] = MoveCursorEnd,
             [new(ConsoleKey.Backspace)] = Backspace,
             [new(ConsoleKey.Delete)] = Delete,
+            [new(ConsoleModifiers.Alt, ConsoleKey.Backspace)] = RemoveWordLeft,
+            [new(ConsoleModifiers.Control, ConsoleKey.Backspace)] = RemoveWordLeft,
             [new(ConsoleModifiers.Control, ConsoleKey.A)] = MoveCursorHome,
             [new(ConsoleModifiers.Control, ConsoleKey.B)] = MoveCursorLeft,
             [new(ConsoleModifiers.Control, ConsoleKey.D)] = Delete,

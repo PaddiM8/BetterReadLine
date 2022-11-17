@@ -48,6 +48,8 @@ class SelectionListing
     //       start by writing out the common first characters, then
     //       let the user press tab again to show the selection
     //       if they want to.
+    // TODO: if there was just one result, stop the completion thing,
+    //       and if the result is a folder, add a slash to the end.
     // TODO: test with different terminal widths
     private void Render()
     {
