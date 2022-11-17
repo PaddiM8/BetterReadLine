@@ -30,9 +30,9 @@ internal interface IRenderer
 
     void RemoveRight(int count);
 
-    void Insert(char c);
-    
-    void Write(string value, bool moveCaret = true, int? length = null);
+    void Insert(string text);
+
+    void WriteLinesOutside(string value, int rowCount, int lastLineLength);
 
     void WriteRaw(string value);
 }

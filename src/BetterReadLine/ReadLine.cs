@@ -81,6 +81,8 @@ public class ReadLine
             keyInfo = Console.ReadKey(true);
         }
 
+        _keyHandler!.HandleEnter();
+
         Console.WriteLine();
         return _keyHandler!.Text;
     }

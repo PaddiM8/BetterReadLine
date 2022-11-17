@@ -118,19 +118,19 @@ internal class Renderer : IRenderer
         WriteRaw("\x1b[K");
     }
 
-    public void Insert(char c)
+    public void Insert(string text)
     {
         if (IsEndOfLine)
         {
-            _text.Append(c);
-            Write(c.ToString());
+            _text.Append(text);
+            Write(text);
         }
         else
         {
-            _text.Insert(Caret, c);
+            _text.Insert(Caret, text);
             string newEndText = _text.ToString()[Caret..];
             Write($"\x1b[K{newEndText}", true, newEndText.Length);
-            Caret -= newEndText.Length - 1;
+            Caret -= newEndText.Length - text.Length;
         }
     }
 
@@ -161,13 +161,27 @@ internal class Renderer : IRenderer
         _text.Append(leftoverText);
     }
 
-    public void Write(string value, bool moveCaret = true, int? length = null)
+    private void Write(string value, bool moveCaret = true, int? length = null)
     {
         WriteRaw(value);
         SetPositionWithoutMoving(Caret + (length ?? value.Length));
 
         if (!moveCaret)
             Caret -= length ?? value.Length;
+    }
+
+    public void WriteLinesOutside(string value, int rowCount, int lastLineLength)
+    {
+        int offset = lastLineLength - _left;
+        string horizontalMovement = "";
+        if (offset < 0)
+            horizontalMovement = $"{Math.Abs(offset)}C";
+        else if (offset > 0)
+            horizontalMovement = $"{offset}D";
+
+        CaretVisible = false;
+        WriteRaw($"\n\x1b[K{value}\x1b[{horizontalMovement}\x1b[{rowCount}A");
+        CaretVisible = true;
     }
 
     public void WriteRaw(string value)
