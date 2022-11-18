@@ -53,6 +53,9 @@ class SelectionListing
     // TODO: test with different terminal widths
     private void Render()
     {
+        if (_items.Count <= 1)
+            return;
+
         const string margin = "   ";
         int columnCount = Math.Min(
             _items.Count,
@@ -61,12 +64,14 @@ class SelectionListing
         columnCount = Math.Min(5, columnCount);
 
         const int maxRowCount = 5;
-        int rowCount = (int)Math.Ceiling((float)_items.Count / columnCount);
+        //int rowCount = (int)Math.Ceiling((float)_items.Count / columnCount);
         int startRow = (int)((float)_selectedIndex / columnCount / maxRowCount) * maxRowCount;
-        rowCount = Math.Min(maxRowCount, rowCount);
+        int rowCount = Math.Min(
+            maxRowCount,
+            (int)Math.Ceiling((float)_items.Count / columnCount - startRow)
+        );
         int endRow = startRow + rowCount;
 
-        _lastRowCount = rowCount;
         var columnWidths = new int[columnCount];
         for (int i = startRow; i < endRow; i++)
         {
@@ -114,6 +119,17 @@ class SelectionListing
         }
 
         int lineLength = columnWidths.Sum() + (columnCount - 1) * margin.Length;
+        System.IO.File.AppendAllText("/Users/paddi/log.txt", _lastRowCount + " | " + rowCount + "\n");
+        if (_lastRowCount > rowCount)
+        {
+            int difference = _lastRowCount - rowCount;
+            var clearLines = string.Join("\n", Enumerable.Repeat("\x1b[K", difference));
+            output.Append($"\n{clearLines}");
+            rowCount = _lastRowCount;
+            lineLength = 0;
+        }
+
         _renderer.WriteLinesOutside(output.ToString(), rowCount, lineLength);
+        _lastRowCount = rowCount;
     }
 }

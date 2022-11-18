@@ -26,8 +26,6 @@ public readonly struct KeyPress
 
 public class KeyHandler
 {
-    public bool IsInAutoCompleteMode => _completions != null;
-
     public string Text => _renderer.Text;
 
     public char[] WordSeparators = { ' ' };
@@ -41,15 +39,13 @@ public class KeyHandler
     private ConsoleKeyInfo _keyInfo;
     private readonly Dictionary<KeyPress, Action> _defaultShortcuts;
     private readonly ShortcutBag? _shortcuts;
-    private string[]? _completions;
-    private int _completionStart;
     private readonly IRenderer _renderer;
-    private readonly SelectionListing _selectionListing;
+    private readonly CompletionState _completionState;
 
     internal KeyHandler(IRenderer renderer, List<string>? history, ShortcutBag? shortcuts)
     {
         _renderer = renderer;
-        _selectionListing = new SelectionListing(renderer);
+        _completionState = new CompletionState(renderer);
 
         _history = history ?? new List<string>();
         _historyIndex = _history.Count;
@@ -91,8 +87,8 @@ public class KeyHandler
         _keyInfo = keyInfo;
 
         // If in auto complete mode and Tab wasn't pressed
-        if (IsInAutoCompleteMode && _keyInfo.Key != ConsoleKey.Tab)
-            ResetAutoComplete();
+        if (_completionState.IsActive && _keyInfo.Key != ConsoleKey.Tab)
+            _completionState.Reset();
 
         if (_shortcuts?.TryGetValue(new(keyInfo.Modifiers, keyInfo.Key), out var action1) ?? false)
         {
@@ -119,7 +115,7 @@ public class KeyHandler
 
     internal void HandleEnter()
     {
-        ResetAutoComplete();
+        _completionState.Reset();
     }
 
     public void Backspace()
@@ -183,39 +179,29 @@ public class KeyHandler
 
     public void NextAutoComplete()
     {
-        if (IsInAutoCompleteMode)
-        {
-            if (_completions!.Length <= 1)
-                return;
-
-            if (_selectionListing.SelectedIndex >= _completions!.Length - 1)
-            {
-                _selectionListing.SelectedIndex = 0;
-            }
-            else
-            {
-                _selectionListing.SelectedIndex++;
-            }
-
-            _renderer.CaretVisible = false;
-            _renderer.RemoveLeft(_renderer.Caret - _completionStart);
-            _renderer.Insert(_completions[_selectionListing.SelectedIndex]);
-            _renderer.CaretVisible = true;
-            return;
-        }
-
         if (AutoCompleteHandler == null)
             return;
 
-        string text = _renderer.Text;
-        _completionStart = AutoCompleteHandler.GetCompletionStart(text, _renderer.Caret);
-        _completions = AutoCompleteHandler.GetSuggestions(text, _completionStart, _renderer.Caret);
-        _completions = _completions?.Length == 0 ? null : _completions;
+        if (_completionState.IsActive)
+        {
+            _completionState.Next();
+            return;
+        }
 
-        if (_completions == null)
+        int start = AutoCompleteHandler.GetCompletionStart(_renderer.Text, _renderer.Caret);
+        var completions = AutoCompleteHandler.GetSuggestions(_renderer.Text, start, _renderer.Caret);
+        if (completions.Length > 0)
+        {
+            _completionState.StartNew(completions, start);
+        }
+    }
+
+    public void PreviousAutoComplete()
+    {
+        if (!_completionState.IsActive || AutoCompleteHandler == null)
             return;
 
-        StartAutoComplete();
+        _completionState.Previous();
     }
 
     public void NextHistory()
@@ -233,22 +219,6 @@ public class KeyHandler
                 _renderer.Insert(_history[_historyIndex]);
             }
         }
-    }
-
-    public void PreviousAutoComplete()
-    {
-        if (!IsInAutoCompleteMode)
-            return;
-        
-
-        _selectionListing.SelectedIndex += _selectionListing.SelectedIndex == 0
-            ? _completions!.Length - 1
-            : -1;
-
-        _renderer.CaretVisible = false;
-        _renderer.RemoveLeft(_renderer.Caret - _completionStart);
-        _renderer.Insert(_completions![_selectionListing.SelectedIndex]);
-        _renderer.CaretVisible = true;
     }
 
     public void PrevHistory()
@@ -283,27 +253,6 @@ public class KeyHandler
         _renderer.RemoveLeft(_renderer.Caret - i);
     }
     
-    public void ResetAutoComplete()
-    {
-        _completions = null;
-        _selectionListing.Clear();
-    }
-
-    public void StartAutoComplete()
-    {
-        _renderer.CaretVisible = false;
-        _renderer.RemoveLeft(_renderer.Caret - _completionStart);
-
-        _renderer.Insert(_completions![_selectionListing.SelectedIndex]);
-        if (_completions.Length > 1)
-        {
-            _selectionListing.LoadItems(_completions);
-            _selectionListing.SelectedIndex = 0;
-        }
-
-        _renderer.CaretVisible = true;
-    }
-
     public void TransposeChars()
     {
         // TODO: Implement TransposeChars
