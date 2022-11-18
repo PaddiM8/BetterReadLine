@@ -64,7 +64,6 @@ class SelectionListing
         columnCount = Math.Min(5, columnCount);
 
         const int maxRowCount = 5;
-        //int rowCount = (int)Math.Ceiling((float)_items.Count / columnCount);
         int startRow = (int)((float)_selectedIndex / columnCount / maxRowCount) * maxRowCount;
         int rowCount = Math.Min(
             maxRowCount,

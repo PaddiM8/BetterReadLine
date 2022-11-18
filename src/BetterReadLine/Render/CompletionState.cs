@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BetterReadLine.Render;
 
@@ -9,7 +10,7 @@ class CompletionState
 
     private readonly IRenderer _renderer;
     private readonly SelectionListing _listing;
-    private IList<string> _completions = Array.Empty<string>();
+    private IList<Completion> _completions = Array.Empty<Completion>();
     private int _completionStart;
 
     public CompletionState(IRenderer renderer)
@@ -18,19 +19,19 @@ class CompletionState
         _listing = new SelectionListing(renderer);
     }
 
-    public void StartNew(IList<string> completions, int completionStart)
+    public void StartNew(IList<Completion> completions, int completionStart)
     {
         _completions = completions;
         _completionStart = completionStart;
         _listing.Clear();
-        _listing.LoadItems(completions);
+        _listing.LoadItems(completions.Select(x => x.DisplayText).ToList());
         _listing.SelectedIndex = 0;
         InsertCompletion();
     }
 
     public void Reset()
     {
-        _completions = Array.Empty<string>();
+        _completions = Array.Empty<Completion>();
         _listing.Clear();
     }
 
@@ -66,7 +67,7 @@ class CompletionState
     {
         _renderer.CaretVisible = false;
         _renderer.RemoveLeft(_renderer.Caret - _completionStart);
-        _renderer.Insert(_completions[_listing.SelectedIndex]);
+        _renderer.Insert(_completions[_listing.SelectedIndex].CompletionText);
         _renderer.CaretVisible = true;
     }
 }

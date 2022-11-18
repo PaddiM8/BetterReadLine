@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace BetterReadLine;
 
 public interface IAutoCompleteHandler
@@ -13,5 +15,5 @@ public interface IAutoCompleteHandler
             : start + 1;
     }
 
-    string[] GetSuggestions(string text, int completionStart, int completionEnd);
+    IList<Completion> GetSuggestions(string text, int completionStart, int completionEnd);
 }

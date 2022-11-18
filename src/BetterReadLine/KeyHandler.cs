@@ -190,7 +190,7 @@ public class KeyHandler
 
         int start = AutoCompleteHandler.GetCompletionStart(_renderer.Text, _renderer.Caret);
         var completions = AutoCompleteHandler.GetSuggestions(_renderer.Text, start, _renderer.Caret);
-        if (completions.Length > 0)
+        if (completions.Count > 0)
         {
             _completionState.StartNew(completions, start);
         }

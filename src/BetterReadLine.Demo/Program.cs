@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BetterReadLine.Demo;
 
@@ -28,8 +29,10 @@ class AutoCompletionHandler : IAutoCompleteHandler
 {
     public char[] Separators { get; set; } = { ' ', '.', '/', '\\', ':' };
         
-    public string[] GetSuggestions(string text, int start, int end)
+    public IList<Completion> GetSuggestions(string text, int start, int end)
     {
-        return text.StartsWith("git ") ? new[] { "init", "clone", "pull", "push" } : null;
+        return text.StartsWith("git ")
+            ? new Completion[] { new("init"), new("clone"), new("pull"), new("push") }
+            : null;
     }
 }
