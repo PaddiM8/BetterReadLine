@@ -32,8 +32,23 @@ public class KeyHandler
 
     internal IAutoCompleteHandler? AutoCompleteHandler { get; set; }
 
-    internal IHighlightHandler? HighlightHandler { get; set; }
+    internal IHighlightHandler? HighlightHandler
+    {
+        get => _highlightHandler;
+        set
+        {
+            _highlightHandler = value;
+            if (value == null)
+            {
+                _renderer.OnHighlight(null);
+                return;
+            }
 
+            _renderer.OnHighlight(value.Highlight);
+        }
+    }
+
+    private IHighlightHandler? _highlightHandler;
     private readonly List<string> _history;
     private int _historyIndex;
     private ConsoleKeyInfo _keyInfo;
@@ -99,18 +114,6 @@ public class KeyHandler
         _defaultShortcuts.TryGetValue(new(keyInfo.Modifiers, keyInfo.Key), out var action2);
         action2 ??= WriteChar;
         action2.Invoke();
-
-        if (HighlightHandler != null && _renderer.Text.Length > 0)
-        {
-            // This is done manually to optimise it in order to avoid flickering
-            string highlighted = HighlightHandler.Highlight(_renderer.Text);
-            int pos = _renderer.Caret;
-            string moveStart = pos > 0 ? $"\x1b[{pos}D" : "";
-            int postOffset = _renderer.Text.Length - pos;
-            string reposition = postOffset > 0 ? $"\x1b[{postOffset}D" : "";
-
-            _renderer.WriteRaw($"\x1b[?25l{moveStart}{highlighted}{reposition}\x1b[?25h");
-        }
     }
 
     internal void HandleEnter()

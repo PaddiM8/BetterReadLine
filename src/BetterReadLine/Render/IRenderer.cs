@@ -20,6 +20,8 @@ internal interface IRenderer
 
     string Text { get; }
 
+    void OnHighlight(Func<string, string>? callback);
+
     void SetCursorPosition(int left, int top);
     
     void SetBufferSize(int width, int height);
@@ -32,7 +34,7 @@ internal interface IRenderer
 
     void RemoveRight(int count);
 
-    void Insert(string text);
+    void Insert(string input);
 
     void WriteLinesOutside(string value, int rowCount, int lastLineLength);
 

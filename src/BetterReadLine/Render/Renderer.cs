@@ -50,7 +50,7 @@ internal class Renderer : IRenderer
                 movement.Append($"\x1b[{Math.Abs(leftDiff)}D");
             }
 
-            Write(movement.ToString());
+            WriteRaw(movement.ToString());
 
             _top = newTop;
             _left = newLeft;
@@ -85,10 +85,22 @@ internal class Renderer : IRenderer
     private int _caret;
     private bool _caretVisible = true;
     private readonly StringBuilder _text = new();
+    private Func<string, string>? _highlighter;
 
     public Renderer()
     {
         InputStart = Console.CursorLeft;
+    }
+
+    public void OnHighlight(Func<string, string>? callback)
+        => _highlighter = callback;
+
+    private string Highlight(string input)
+    {
+        if (input.Length == 0 || _highlighter == null)
+            return input;
+
+        return _highlighter(input);
     }
 
     public void SetBufferSize(int width, int height)
@@ -103,9 +115,7 @@ internal class Renderer : IRenderer
     public void ClearLineLeft(int? fromIndex = null)
     {
         _text.Remove(0, fromIndex ?? Caret);
-        Caret = 0;
-        WriteRaw("\x1b[K");
-        Write(Text, false);
+        RenderText();
         Caret = 0;
     }
 
@@ -115,22 +125,22 @@ internal class Renderer : IRenderer
             Caret = fromIndex.Value;
 
         _text.Remove(Caret, _text.Length - Caret);
-        WriteRaw("\x1b[K");
+        RenderText();
     }
 
-    public void Insert(string text)
+    public void Insert(string input)
     {
         if (IsEndOfLine)
         {
-            _text.Append(text);
-            Write(text);
+            _text.Append(input);
+            RenderText();
         }
         else
         {
-            _text.Insert(Caret, text);
-            string newEndText = _text.ToString()[Caret..];
-            Write($"\x1b[K{newEndText}", true, newEndText.Length);
-            Caret -= newEndText.Length - text.Length;
+            _text.Insert(Caret, input);
+            int offset = _text.Length - Caret - input.Length;
+            RenderText();
+            Caret -= offset;
         }
     }
 
@@ -141,11 +151,10 @@ internal class Renderer : IRenderer
         if (count == 0)
             return;
 
-        string leftoverText = Text[Caret..];
-        Caret -= count;
-        ClearLineRight();
-        Write(leftoverText, false);
-        _text.Append(leftoverText);
+        int newPos = Caret - count;
+        _text.Remove(newPos, count);
+        RenderText();
+        Caret = newPos;
     }
 
     public void RemoveRight(int count)
@@ -155,19 +164,27 @@ internal class Renderer : IRenderer
         if (count == 0 || Caret == _text.Length)
             return;
 
-        string leftoverText = Text[(Caret + count)..];
-        ClearLineRight();
-        Write(leftoverText, false);
-        _text.Append(leftoverText);
+        int newPos = Caret;
+        _text.Remove(Caret, count);
+        RenderText();
+        Caret = newPos;
     }
 
-    private void Write(string value, bool moveCaret = true, int? length = null)
+    // Is this going to be necessary or not?
+    /*private void Write(string value, bool moveCaret = true, int? length = null)
     {
         WriteRaw($"{value}\x1b[K");
         SetPositionWithoutMoving(Caret + (length ?? value.Length));
 
         if (!moveCaret)
             Caret -= length ?? value.Length;
+    }*/
+
+    private void RenderText()
+    {
+        Caret = 0;
+        WriteRaw($"{Highlight(Text)}\x1b[K");
+        SetPositionWithoutMoving(Text.Length);
     }
 
     public void WriteLinesOutside(string value, int rowCount, int lastLineLength)
