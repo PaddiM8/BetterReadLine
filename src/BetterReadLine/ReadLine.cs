@@ -35,17 +35,24 @@ public class ReadLine
     public string Read(string prompt = "", string @default = "")
     {
         Console.Write(prompt);
+        bool enterPressed = false;
         _keyHandler = new KeyHandler(new Renderer(), _history, _shortcuts)
         {
             AutoCompleteHandler = AutoCompletionHandler,
             HighlightHandler = HighlightHandler,
+            OnEnter = () => enterPressed = true,
         };
 
         if (WordSeparators != null)
             _keyHandler.WordSeparators = WordSeparators;
 
-        string text = GetText();
+        //string text = GetText();
+        while (!enterPressed)
+        {
+            _keyHandler.Handle(Console.ReadKey(true));
+        }
 
+        string text = _keyHandler.Text;
         if (string.IsNullOrWhiteSpace(text) && !string.IsNullOrWhiteSpace(@default))
         {
             text = @default;
@@ -59,20 +66,12 @@ public class ReadLine
         return text;
     }
 
-    public string ReadPassword(string prompt = "")
-    {
-        Console.Write(prompt);
-        _keyHandler = new KeyHandler(new Renderer { PasswordMode = true }, null, _shortcuts);
-        
-        return GetText();
-    }
-
     public void RegisterShortcut(KeyPress keyPress, Action<KeyHandler> action)
     {
         _shortcuts.Add(keyPress, action);
     }
 
-    private string GetText()
+    /*private string GetText()
     {
         var keyInfo = Console.ReadKey(true);
         while (keyInfo.Key != ConsoleKey.Enter)
@@ -82,8 +81,8 @@ public class ReadLine
         }
 
         _keyHandler!.HandleEnter();
-
         Console.WriteLine();
+
         return _keyHandler!.Text;
-    }
+    }*/
 }

@@ -48,6 +48,8 @@ public class KeyHandler
         }
     }
 
+    internal Action? OnEnter { get; set; }
+
     private IHighlightHandler? _highlightHandler;
     private readonly List<string> _history;
     private int _historyIndex;
@@ -86,7 +88,7 @@ public class KeyHandler
             [new(ConsoleModifiers.Control, ConsoleKey.F)] = MoveCursorRight,
             [new(ConsoleModifiers.Control, ConsoleKey.H)] = Backspace,
             [new(ConsoleModifiers.Control, ConsoleKey.K)] = RemoveToEnd,
-            [new(ConsoleModifiers.Control, ConsoleKey.L)] = ClearLine,
+            [new(ConsoleModifiers.Control, ConsoleKey.L)] = ClearConsole,
             [new(ConsoleModifiers.Control, ConsoleKey.N)] = NextHistory,
             [new(ConsoleModifiers.Control, ConsoleKey.P)] = PrevHistory,
             [new(ConsoleModifiers.Control, ConsoleKey.T)] = TransposeChars,
@@ -105,6 +107,13 @@ public class KeyHandler
         if (_completionState.IsActive && _keyInfo.Key != ConsoleKey.Tab)
             _completionState.Reset();
 
+        if (OnEnter != null && keyInfo.Key == ConsoleKey.Enter)
+        {
+            Console.WriteLine();
+            OnEnter();
+            return;
+        }
+
         if (_shortcuts?.TryGetValue(new(keyInfo.Modifiers, keyInfo.Key), out var action1) ?? false)
         {
             action1?.Invoke(this);
@@ -116,19 +125,15 @@ public class KeyHandler
         action2.Invoke();
     }
 
-    internal void HandleEnter()
-    {
-        _completionState.Reset();
-    }
-
     public void Backspace()
     {
         _renderer.RemoveLeft(1);
     }
 
-    public void ClearLine()
+    public void ClearConsole()
     {
-        _renderer.ClearLineLeft();
+        _renderer.Clear();
+        OnEnter?.Invoke();
     }
 
     public void Delete()

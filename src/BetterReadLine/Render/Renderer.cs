@@ -15,8 +15,6 @@ internal class Renderer : IRenderer
 
     public int InputStart { get; }
 
-    public bool PasswordMode { get; set; }
-
     public int Caret
     {
         get
@@ -108,8 +106,12 @@ internal class Renderer : IRenderer
 
     public void SetCursorPosition(int left, int top)
     {
-        if (!PasswordMode)
-            Console.SetCursorPosition(left, top);
+        Console.SetCursorPosition(left, top);
+    }
+
+    public void Clear()
+    {
+        Console.Clear();
     }
 
     public void ClearLineLeft(int? fromIndex = null)
@@ -203,9 +205,6 @@ internal class Renderer : IRenderer
 
     public void WriteRaw(string value)
     {
-        if (PasswordMode)
-            value = new string(default, value.Length);
-
         Console.Write(value);
     }
 
