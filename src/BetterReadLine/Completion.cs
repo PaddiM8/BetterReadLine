@@ -10,5 +10,14 @@ public class Completion
     {
         CompletionText = completionText;
         DisplayText = displayText ?? completionText;
+
+        const int maxLength = 20;
+        if (DisplayText.Length > maxLength)
+        {
+            DisplayText = DisplayText[..(maxLength - 3)];
+            DisplayText += DisplayText.EndsWith(".")
+                ? ".."
+                : "...";
+        }
     }
 }
