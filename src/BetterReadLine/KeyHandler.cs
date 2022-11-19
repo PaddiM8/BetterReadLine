@@ -103,7 +103,6 @@ public class KeyHandler
     {
         _keyInfo = keyInfo;
 
-        // If in auto complete mode and Tab wasn't pressed
         if (_completionState.IsActive && _keyInfo.Key != ConsoleKey.Tab)
             _completionState.Reset();
 

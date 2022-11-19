@@ -82,7 +82,7 @@ class SelectionListing
                 int index = i * columnCount + j;
                 if (index >= _items.Count)
                 {
-                    output.Append(new string(' ', columnWidths[j]));
+                    output.Append(new string(' ', columnWidths[j]) + margin);
                     break;
                 }
 
@@ -125,7 +125,6 @@ class SelectionListing
             rowCount += difference;
             lineLength = 0;
         }
-        //System.IO.File.AppendAllText("/Users/paddi/log.txt", rowCount + ", " + lineLength + "\n");
 
         _renderer.WriteLinesOutside(output.ToString(), rowCount, lineLength);
         _lastBottomRowIndex = _renderer.CursorTop + rowCount;

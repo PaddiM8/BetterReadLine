@@ -140,9 +140,9 @@ internal class Renderer : IRenderer
         else
         {
             _text.Insert(Caret, input);
-            int offset = _text.Length - Caret - input.Length;
+            int newPos = Caret + input.Length;
             RenderText();
-            Caret -= offset;
+            Caret = newPos;
         }
     }
 
