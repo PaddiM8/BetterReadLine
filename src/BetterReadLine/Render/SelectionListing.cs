@@ -99,9 +99,7 @@ class SelectionListing
                     content = content[..(_renderer.BufferWidth - 3)] + "...";
                 }
 
-                string padding = columnCount > 1
-                    ? new string(' ', columnWidths[j] - content.Length)
-                    : "";
+                string padding = new string(' ', columnWidths[j] - content.Length);
                 if (index == SelectedIndex)
                     content = $"\x1b[107m\x1b[30m{content}\x1b[0m";
 
