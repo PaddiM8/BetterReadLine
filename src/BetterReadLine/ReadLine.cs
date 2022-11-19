@@ -46,7 +46,6 @@ public class ReadLine
         if (WordSeparators != null)
             _keyHandler.WordSeparators = WordSeparators;
 
-        //string text = GetText();
         while (!enterPressed)
         {
             _keyHandler.Handle(Console.ReadKey(true));

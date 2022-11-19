@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 
 namespace BetterReadLine.Render;
@@ -82,6 +83,7 @@ internal class Renderer : IRenderer
     private int _left = Console.CursorLeft;
     private int _caret;
     private bool _caretVisible = true;
+    private int _previousRenderTop;
     private readonly StringBuilder _text = new();
     private Func<string, string>? _highlighter;
 
@@ -172,21 +174,28 @@ internal class Renderer : IRenderer
         Caret = newPos;
     }
 
-    // Is this going to be necessary or not?
-    /*private void Write(string value, bool moveCaret = true, int? length = null)
-    {
-        WriteRaw($"{value}\x1b[K");
-        SetPositionWithoutMoving(Caret + (length ?? value.Length));
-
-        if (!moveCaret)
-            Caret -= length ?? value.Length;
-    }*/
-
     private void RenderText()
     {
         Caret = 0;
-        WriteRaw($"{Highlight(Text)}\x1b[K");
+        string newLine = (InputStart + Text.Length) % BufferWidth == 0
+            ? newLine = "\n"
+            : "";
+        WriteRaw($"{Highlight(Text)}{newLine}\x1b[K");
         SetPositionWithoutMoving(Text.Length);
+
+        // If there are leftover lines under,
+        // clear them.
+        if (_previousRenderTop > _top)
+        {
+            int diff = _previousRenderTop - _top;
+            string clearLines = string.Join(
+                "",
+                Enumerable.Repeat("\x1b[B\x1b[G\x1b[K", diff)
+            );
+            WriteRaw($"{clearLines}\x1b[{diff}A\x1b[{_left}C");
+        }
+
+        _previousRenderTop = _top;
     }
 
     public void WriteLinesOutside(string value, int rowCount, int lastLineLength)
