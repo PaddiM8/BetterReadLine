@@ -163,7 +163,7 @@ internal class Renderer : IRenderer
 
     private void Write(string value, bool moveCaret = true, int? length = null)
     {
-        WriteRaw(value);
+        WriteRaw($"{value}\x1b[K");
         SetPositionWithoutMoving(Caret + (length ?? value.Length));
 
         if (!moveCaret)

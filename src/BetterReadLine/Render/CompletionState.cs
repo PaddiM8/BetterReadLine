@@ -27,6 +27,7 @@ class CompletionState
         _listing.LoadItems(completions.Select(x => x.DisplayText).ToList());
         _listing.SelectedIndex = 0;
         InsertCompletion();
+        _listing.Render();
     }
 
     public void Reset()
@@ -37,6 +38,7 @@ class CompletionState
 
     public void Next()
     {
+
         if (_listing.SelectedIndex >= _completions.Count - 1)
         {
             _listing.SelectedIndex = 0;
@@ -47,10 +49,12 @@ class CompletionState
         }
 
         InsertCompletion();
+        _listing.Render();
     }
 
     public void Previous()
     {
+
         if (_listing.SelectedIndex == 0)
         {
             _listing.SelectedIndex = _completions.Count - 1;
@@ -61,6 +65,7 @@ class CompletionState
         }
 
         InsertCompletion();
+        _listing.Render();
     }
 
     private void InsertCompletion()

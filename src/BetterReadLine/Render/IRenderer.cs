@@ -1,3 +1,5 @@
+using System;
+
 namespace BetterReadLine.Render;
     
 internal interface IRenderer
