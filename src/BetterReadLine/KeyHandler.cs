@@ -266,7 +266,11 @@ public class KeyHandler
         // TODO: Implement TransposeChars
     }
 
-    public void WriteChar() => WriteChar(_keyInfo.KeyChar);
+    public void WriteChar()
+    {
+        if (_keyInfo.KeyChar != '\0')
+            WriteChar(_keyInfo.KeyChar);
+    }
 
     public void WriteChar(char c)
     {
