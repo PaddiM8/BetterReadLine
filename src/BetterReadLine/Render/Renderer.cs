@@ -25,35 +25,11 @@ internal class Renderer : IRenderer
 
         set
         {
-            int index = Math.Max(Math.Min(_text.Length, value), 0);
-            (int newTop, int newLeft) = IndexToTopLeft(index);
-            var movement = new StringBuilder();
-
-            int topDiff = newTop - _top;
-            if (topDiff > 0)
-            {
-                movement.Append($"\x1b[{topDiff}B");
-            }
-            else if (topDiff < 0)
-            {
-                movement.Append($"\x1b[{Math.Abs(topDiff)}A");
-            }
-
-            int leftDiff = newLeft - _left;
-            if (leftDiff > 0)
-            {
-                movement.Append($"\x1b[{leftDiff}C");
-            }
-            else if (leftDiff < 0)
-            {
-                movement.Append($"\x1b[{Math.Abs(leftDiff)}D");
-            }
-
-            WriteRaw(movement.ToString());
+            WriteRaw(IndexToMovement(value, out int newTop, out int newLeft));
 
             _top = newTop;
             _left = newLeft;
-            _caret = index;
+            _caret = Math.Max(Math.Min(_text.Length, value), 0);
         }
     }
 
@@ -109,6 +85,37 @@ internal class Renderer : IRenderer
     public void SetCursorPosition(int left, int top)
     {
         Console.SetCursorPosition(left, top);
+    }
+
+    public void CaretUp()
+    {
+        int lineStart = Text.LastIndexOf('\n', Caret);
+        if (lineStart == -1)
+        {
+            Caret = 0;
+            return;
+        }
+
+        int newLineStart = Text.LastIndexOf('\n', lineStart - 1);
+        int newLineEnd = lineStart - 1;
+        Caret = Math.Min(newLineEnd, newLineStart + (Caret - lineStart));
+    }
+    
+    public void CaretDown()
+    {
+        int lineEnd = Text.IndexOf('\n', Caret);
+        if (lineEnd == -1)
+        {
+            Caret = _text.Length;
+            return;
+        }
+
+        int lineStart = Text.LastIndexOf('\n', Math.Max(0, Caret - 1));
+        int newLineEnd = Text.IndexOf('\n', lineEnd + 1);
+        if (newLineEnd == -1)
+            newLineEnd = _text.Length;
+        
+        Caret = Math.Min(newLineEnd, lineEnd + (Caret - lineStart));
     }
 
     public void Clear()
@@ -176,12 +183,14 @@ internal class Renderer : IRenderer
 
     private void RenderText()
     {
-        CaretVisible = false;
-        Caret = 0;
-        string newLine = (InputStart + Text.Length) % BufferWidth == 0
-            ? newLine = "\n"
+        string movementToStart = IndexToMovement(0);
+        var (top, left) = IndexToTopLeft(Text.Length);
+        string newLine = top > 0 && left == 0 && _text[^1] != '\n'
+            ? "\n"
             : "";
-        WriteRaw($"{Highlight(Text)}{newLine}\x1b[K");
+        string formattedText = Highlight(Text)
+            .Replace("\n", $"\x1b[K\n{new string(' ', InputStart)}");
+        WriteRaw($"\x1b[?25l{movementToStart}{formattedText}{newLine}\x1b[?25h\x1b[K");
         SetPositionWithoutMoving(Text.Length);
 
         // If there are leftover lines under, clear them.
@@ -195,7 +204,6 @@ internal class Renderer : IRenderer
             WriteRaw($"{clearLines}\x1b[{diff}A\x1b[{_left}C");
         }
 
-        CaretVisible = true;
         _previousRenderTop = _top;
     }
 
@@ -228,14 +236,58 @@ internal class Renderer : IRenderer
 
     private (int, int) IndexToTopLeft(int index)
     {
-        int top = index + InputStart < BufferWidth
-            ? 0
-            : (index + InputStart) / BufferWidth;
-
-        int left = index + InputStart;
-        if (top > 0)
-            left = index + InputStart - top * BufferWidth;
+        int top = 0;
+        int left = InputStart;
+        for (int i = 0; i < index; i++)
+        {
+            if (_text[i] == '\n')
+            {
+                top++;
+                left = InputStart;
+            }
+            else if (left == BufferWidth - 1)
+            {
+                top++;
+                left = 0;
+            }
+            else
+            {
+                left++;
+            }
+        }
 
         return (top, left);
+    }
+
+    private string IndexToMovement(int index)
+        => IndexToMovement(index, out int _, out int _);
+
+    private string IndexToMovement(int index, out int newTop, out int newLeft)
+    {
+        index = Math.Max(Math.Min(_text.Length, index), 0);
+        (newTop, newLeft) = IndexToTopLeft(index);
+        var movement = new StringBuilder();
+
+        int topDiff = newTop - _top;
+        if (topDiff > 0)
+        {
+            movement.Append($"\x1b[{topDiff}B");
+        }
+        else if (topDiff < 0)
+        {
+            movement.Append($"\x1b[{Math.Abs(topDiff)}A");
+        }
+
+        int leftDiff = newLeft - _left;
+        if (leftDiff > 0)
+        {
+            movement.Append($"\x1b[{leftDiff}C");
+        }
+        else if (leftDiff < 0)
+        {
+            movement.Append($"\x1b[{Math.Abs(leftDiff)}D");
+        }
+
+        return movement.ToString();
     }
 }

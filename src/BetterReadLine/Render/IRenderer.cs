@@ -26,6 +26,10 @@ internal interface IRenderer
     
     void SetBufferSize(int width, int height);
 
+    void CaretUp();
+    
+    void CaretDown();
+
     void Clear();
 
     void ClearLineLeft(int? fromIndex = null);

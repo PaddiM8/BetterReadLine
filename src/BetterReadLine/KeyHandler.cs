@@ -73,8 +73,8 @@ public class KeyHandler
             [new(ConsoleKey.RightArrow)] = MoveCursorRight,
             [new(ConsoleModifiers.Control, ConsoleKey.LeftArrow)] = MoveCursorWordLeft,
             [new(ConsoleModifiers.Control, ConsoleKey.RightArrow)] = MoveCursorWordRight,
-            [new(ConsoleKey.UpArrow)] = PrevHistory,
-            [new(ConsoleKey.DownArrow)] = NextHistory,
+            [new(ConsoleKey.UpArrow)] = UpArrow,
+            [new(ConsoleKey.DownArrow)] = DownArrow,
             [new(ConsoleKey.Home)] = MoveCursorHome,
             [new(ConsoleKey.End)] = MoveCursorEnd,
             [new(ConsoleKey.Backspace)] = Backspace,
@@ -89,8 +89,8 @@ public class KeyHandler
             [new(ConsoleModifiers.Control, ConsoleKey.H)] = Backspace,
             [new(ConsoleModifiers.Control, ConsoleKey.K)] = RemoveToEnd,
             [new(ConsoleModifiers.Control, ConsoleKey.L)] = ClearConsole,
-            [new(ConsoleModifiers.Control, ConsoleKey.N)] = NextHistory,
-            [new(ConsoleModifiers.Control, ConsoleKey.P)] = PrevHistory,
+            [new(ConsoleModifiers.Control, ConsoleKey.N)] = DownArrow,
+            [new(ConsoleModifiers.Control, ConsoleKey.P)] = UpArrow,
             [new(ConsoleModifiers.Control, ConsoleKey.T)] = TransposeChars,
             [new(ConsoleModifiers.Control, ConsoleKey.U)] = RemoveToHome,
             [new(ConsoleModifiers.Control, ConsoleKey.W)] = RemoveWordLeft,
@@ -108,8 +108,17 @@ public class KeyHandler
 
         if (OnEnter != null && keyInfo.Key == ConsoleKey.Enter)
         {
-            Console.WriteLine();
-            OnEnter();
+            // TODO: Handle escaped new lines in the text argument parser (they should be ignored)
+            if ("\\|".Contains(_renderer.Text.LastOrDefault()))
+            {
+                _renderer.Insert("\n");
+            }
+            else
+            {
+                Console.WriteLine();
+                OnEnter();
+            }
+            
             return;
         }
 
@@ -211,8 +220,31 @@ public class KeyHandler
         _completionState.Previous();
     }
 
-    public void NextHistory()
+    public void UpArrow()
     {
+        string text = _renderer.Text;
+        if (text.Contains('\n') && _renderer.Caret != 0 && _renderer.Caret != text.Length)
+        {
+            _renderer.CaretUp();
+            return;
+        }
+        
+        if (_historyIndex > 0)
+        {
+            _historyIndex--;
+            _renderer.ClearLineRight(0);
+            _renderer.Insert(_history[_historyIndex]);
+        }
+    }
+
+    public void DownArrow()
+    {
+        if (_renderer.Text.Contains('\n') && _renderer.Caret != _renderer.Text.Length)
+        {
+            _renderer.CaretDown();
+            return;
+        }
+        
         if (_historyIndex < _history.Count)
         {
             _historyIndex++;
@@ -225,16 +257,6 @@ public class KeyHandler
                 _renderer.ClearLineRight(0);
                 _renderer.Insert(_history[_historyIndex]);
             }
-        }
-    }
-
-    public void PrevHistory()
-    {
-        if (_historyIndex > 0)
-        {
-            _historyIndex--;
-            _renderer.ClearLineRight(0);
-            _renderer.Insert(_history[_historyIndex]);
         }
     }
 
