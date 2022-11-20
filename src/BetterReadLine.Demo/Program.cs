@@ -19,9 +19,6 @@ public class Program
 
         string input = readLine.Read("(prompt)> ");
         Console.WriteLine(input);
-
-        input = readLine.ReadPassword("Enter Password> ");
-        Console.WriteLine(input);
     }
 }
 

@@ -84,7 +84,7 @@ class SelectionListing
                 if (index >= _items.Count)
                 {
                     output.Append(new string(' ', columnWidths[j]) + margin);
-                    break;
+                    continue;
                 }
 
                 if (j != 0 && columnCount > 1)
