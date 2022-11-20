@@ -105,14 +105,6 @@ internal class Renderer : IRenderer
         return _highlighter(input);
     }
 
-    public void SetBufferSize(int width, int height)
-        => Console.SetBufferSize(width, height);
-
-    public void SetCursorPosition(int left, int top)
-    {
-        Console.SetCursorPosition(left, top);
-    }
-
     public void CaretUp()
     {
         int lineStart = LineStartIndex;
@@ -263,7 +255,7 @@ internal class Renderer : IRenderer
         CaretVisible = true;
     }
 
-    public void WriteRaw(string value)
+    private void WriteRaw(string value)
     {
         Console.Write(value);
     }

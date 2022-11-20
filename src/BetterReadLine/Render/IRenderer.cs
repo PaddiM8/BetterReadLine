@@ -22,10 +22,6 @@ internal interface IRenderer
 
     void OnHighlight(Func<string, string>? callback);
 
-    void SetCursorPosition(int left, int top);
-    
-    void SetBufferSize(int width, int height);
-
     void CaretUp();
     
     void CaretDown();
@@ -43,6 +39,4 @@ internal interface IRenderer
     void Insert(string input);
 
     void WriteLinesOutside(string value, int rowCount, int lastLineLength);
-
-    void WriteRaw(string value);
 }
