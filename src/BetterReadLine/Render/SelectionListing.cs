@@ -30,23 +30,24 @@ class SelectionListing
         _items = Array.Empty<string>();
         _maxLength = 0;
         SelectedIndex = 0;
-        string clearLines = string.Join("\n", Enumerable.Repeat("\x1b[K", _lastBottomRowIndex));
-        _renderer.WriteLinesOutside(clearLines, _lastBottomRowIndex, 0);
+
+        int diff = _lastBottomRowIndex -_renderer.CursorTop;
+        if (diff > 0)
+        {
+            string clearLines = string.Join(
+                "\n",
+                Enumerable.Repeat("\x1b[K", diff)
+            );
+            _renderer.WriteLinesOutside(clearLines, diff, 0);
+        }
+
+        _lastBottomRowIndex = 0;
     }
 
     public void Render()
     {
         if (_items.Count <= 1)
             return;
-
-        /*if (offset != 0)
-        {
-            string clearLines = string.Join("\n", Enumerable.Repeat("\x1b[K", offset));
-            string offsetMovement = offset< 0
-                ? $"{Math.Abs(offset)}D"
-                : $"{offset}C";
-            _renderer.WriteLinesOutside($"\x1b[{offsetMovement}{clearLines}", offset, 0);
-        }*/
 
         const string margin = "   ";
         int columnCount = Math.Min(
