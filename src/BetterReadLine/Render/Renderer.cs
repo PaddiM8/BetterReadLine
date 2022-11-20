@@ -176,6 +176,7 @@ internal class Renderer : IRenderer
 
     private void RenderText()
     {
+        CaretVisible = false;
         Caret = 0;
         string newLine = (InputStart + Text.Length) % BufferWidth == 0
             ? newLine = "\n"
@@ -183,8 +184,7 @@ internal class Renderer : IRenderer
         WriteRaw($"{Highlight(Text)}{newLine}\x1b[K");
         SetPositionWithoutMoving(Text.Length);
 
-        // If there are leftover lines under,
-        // clear them.
+        // If there are leftover lines under, clear them.
         if (_previousRenderTop > _top)
         {
             int diff = _previousRenderTop - _top;
@@ -195,6 +195,7 @@ internal class Renderer : IRenderer
             WriteRaw($"{clearLines}\x1b[{diff}A\x1b[{_left}C");
         }
 
+        CaretVisible = true;
         _previousRenderTop = _top;
     }
 
