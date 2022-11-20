@@ -18,7 +18,7 @@ internal interface IRenderer
 
     bool CaretVisible { get; set; }
 
-    string Text { get; }
+    string Text { get; set; }
 
     void OnHighlight(Func<string, string>? callback);
 
@@ -31,7 +31,7 @@ internal interface IRenderer
     void CaretDown();
 
     void Clear();
-
+    
     void ClearLineLeft(int? fromIndex = null);
 
     void ClearLineRight(int? fromIndex = null);

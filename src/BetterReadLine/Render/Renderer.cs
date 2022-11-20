@@ -51,9 +51,35 @@ internal class Renderer : IRenderer
         }
     }
 
-    public string Text => _text.ToString();
+    public string Text
+    {
+        get => _text.ToString();
+        set
+        {
+            _text.Clear();
+            _text.Append(value);
+            RenderText();
+        }
+    }
 
     private bool IsEndOfLine => Caret >= _text.Length;
+
+    private int LineStartIndex => Math.Max(
+        0,
+        Text.LastIndexOf('\n', Math.Min(_text.Length - 1, Caret))
+    );
+
+    private int LineEndIndex
+    {
+        get
+        {
+            int index = Text.IndexOf('\n', Caret);
+
+            return index == -1
+                ? _text.Length
+                : index;
+        }
+    }
 
     private int _top;
     private int _left = Console.CursorLeft;
@@ -89,8 +115,8 @@ internal class Renderer : IRenderer
 
     public void CaretUp()
     {
-        int lineStart = Text.LastIndexOf('\n', Caret);
-        if (lineStart == -1)
+        int lineStart = LineStartIndex;
+        if (lineStart == 0)
         {
             Caret = 0;
             return;
@@ -103,8 +129,8 @@ internal class Renderer : IRenderer
     
     public void CaretDown()
     {
-        int lineEnd = Text.IndexOf('\n', Caret);
-        if (lineEnd == -1)
+        int lineEnd = LineEndIndex;
+        if (lineEnd == _text.Length)
         {
             Caret = _text.Length;
             return;
@@ -125,9 +151,15 @@ internal class Renderer : IRenderer
 
     public void ClearLineLeft(int? fromIndex = null)
     {
-        _text.Remove(0, fromIndex ?? Caret);
+        int start = LineStartIndex;
+        
+        // Don't include the new line character
+        if (start != 0)
+            start++;
+        
+        _text.Remove(start, Caret - (fromIndex ?? start));
         RenderText();
-        Caret = 0;
+        Caret = start;
     }
 
     public void ClearLineRight(int? fromIndex = null)
@@ -135,10 +167,20 @@ internal class Renderer : IRenderer
         if (fromIndex != null)
             Caret = fromIndex.Value;
 
-        _text.Remove(Caret, _text.Length - Caret);
+        int end = LineEndIndex;
+        int pos = Caret;
+        _text.Remove(Caret, end - Caret);
         RenderText();
+        
+        // Don't bother putting it at the end since
+        // it's already there by default. Moving the
+        // caret isn't free and low latency is crucial.
+        // In most cases it's already going to be at
+        // the end.
+        if (pos != _text.Length)
+            Caret = pos;
     }
-
+    
     public void Insert(string input)
     {
         if (IsEndOfLine)

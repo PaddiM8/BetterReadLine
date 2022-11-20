@@ -232,8 +232,7 @@ public class KeyHandler
         if (_historyIndex > 0)
         {
             _historyIndex--;
-            _renderer.ClearLineRight(0);
-            _renderer.Insert(_history[_historyIndex]);
+            _renderer.Text = _history[_historyIndex];
         }
     }
 
@@ -250,12 +249,11 @@ public class KeyHandler
             _historyIndex++;
             if (_historyIndex == _history.Count)
             {
-                _renderer.ClearLineRight(0);
+                _renderer.Text = "";
             }
             else
             {
-                _renderer.ClearLineRight(0);
-                _renderer.Insert(_history[_historyIndex]);
+                _renderer.Text = _history[_historyIndex];
             }
         }
     }
