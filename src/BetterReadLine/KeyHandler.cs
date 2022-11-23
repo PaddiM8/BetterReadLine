@@ -30,6 +30,8 @@ public class KeyHandler
 
     public char[] WordSeparators = { ' ' };
 
+    internal IHistoryHandler? HistoryHandler { get; set; }
+    
     internal IAutoCompleteHandler? AutoCompleteHandler { get; set; }
 
     internal IHighlightHandler? HighlightHandler
@@ -51,21 +53,18 @@ public class KeyHandler
     internal Action? OnEnter { get; set; }
 
     private IHighlightHandler? _highlightHandler;
-    private readonly List<string> _history;
-    private int _historyIndex;
     private ConsoleKeyInfo _keyInfo;
+    private bool _wasEdited;
     private readonly Dictionary<KeyPress, Action> _defaultShortcuts;
     private readonly ShortcutBag? _shortcuts;
     private readonly IRenderer _renderer;
     private readonly CompletionState _completionState;
 
-    internal KeyHandler(IRenderer renderer, List<string>? history, ShortcutBag? shortcuts)
+    internal KeyHandler(IRenderer renderer, ShortcutBag? shortcuts)
     {
         _renderer = renderer;
         _completionState = new CompletionState(renderer);
 
-        _history = history ?? new List<string>();
-        _historyIndex = _history.Count;
         _shortcuts = shortcuts;
         _defaultShortcuts = new Dictionary<KeyPress, Action>
         {
@@ -116,6 +115,7 @@ public class KeyHandler
             else
             {
                 Console.WriteLine();
+                _wasEdited = false;
                 OnEnter();
             }
             
@@ -229,11 +229,10 @@ public class KeyHandler
             return;
         }
         
-        if (_historyIndex > 0)
-        {
-            _historyIndex--;
-            _renderer.Text = _history[_historyIndex];
-        }
+        var result = HistoryHandler?.GetNext(_renderer.Text, _renderer.Caret, _wasEdited);
+        _wasEdited = false;
+        if (result != null)
+            _renderer.Text = result;
     }
 
     public void DownArrow()
@@ -244,18 +243,10 @@ public class KeyHandler
             return;
         }
         
-        if (_historyIndex < _history.Count)
-        {
-            _historyIndex++;
-            if (_historyIndex == _history.Count)
-            {
-                _renderer.Text = "";
-            }
-            else
-            {
-                _renderer.Text = _history[_historyIndex];
-            }
-        }
+        var result = HistoryHandler?.GetPrevious(_renderer.Text, _renderer.Caret);
+        _wasEdited = false;
+        if (result != null)
+            _renderer.Text = result;
     }
 
     public void RemoveToEnd()
@@ -287,6 +278,8 @@ public class KeyHandler
 
     public void WriteChar()
     {
+        _wasEdited = true;
+        
         if (_keyInfo.KeyChar != '\0')
             WriteChar(_keyInfo.KeyChar);
     }

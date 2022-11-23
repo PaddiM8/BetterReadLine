@@ -13,7 +13,6 @@ public class Program
 
         var readLine = new ReadLine();
         string[] history = { "ls -a", "dotnet run", "git init" };
-        readLine.AddHistory(history);
 
         readLine.AutoCompletionHandler = new AutoCompletionHandler();
 
