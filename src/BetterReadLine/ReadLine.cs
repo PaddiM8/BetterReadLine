@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using BetterReadLine.Render;
 
 namespace BetterReadLine;
@@ -12,6 +11,8 @@ public class ReadLine
     public IAutoCompleteHandler? AutoCompletionHandler { private get; set; }
 
     public IHighlightHandler? HighlightHandler { private get; set; }
+    
+    public IHintHandler? HintHandler { private get; set; }
 
     public char[]? WordSeparators { get; set; }
     
@@ -28,6 +29,7 @@ public class ReadLine
             HistoryHandler = HistoryHandler,
             AutoCompleteHandler = AutoCompletionHandler,
             HighlightHandler = HighlightHandler,
+            HintHandler = HintHandler,
             OnEnter = () => enterPressed = true,
         };
 

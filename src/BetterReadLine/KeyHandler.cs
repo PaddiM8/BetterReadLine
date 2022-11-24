@@ -33,6 +33,22 @@ public class KeyHandler
     internal IHistoryHandler? HistoryHandler { get; set; }
     
     internal IAutoCompleteHandler? AutoCompleteHandler { get; set; }
+    
+    internal IHintHandler? HintHandler
+    {
+        get => _hintHandler;
+        set
+        {
+            _hintHandler = value;
+            if (value == null)
+            {
+                _renderer.OnHint(null);
+                return;
+            }
+
+            _renderer.OnHint(value.Hint);
+        }
+    }
 
     internal IHighlightHandler? HighlightHandler
     {
@@ -53,6 +69,7 @@ public class KeyHandler
     internal Action? OnEnter { get; set; }
 
     private IHighlightHandler? _highlightHandler;
+    private IHintHandler? _hintHandler;
     private ConsoleKeyInfo _keyInfo;
     private bool _wasEdited;
     private readonly Dictionary<KeyPress, Action> _defaultShortcuts;
@@ -114,6 +131,9 @@ public class KeyHandler
             }
             else
             {
+                // Re-render without any potential hints
+                _renderer.RenderText();
+                HintHandler?.Reset();
                 Console.WriteLine();
                 _wasEdited = false;
                 OnEnter();
@@ -162,6 +182,8 @@ public class KeyHandler
     public void MoveCursorRight()
     {
         _renderer.Caret++;
+        if (_renderer.IsEndOfLine && _renderer.HintText != null)
+            _renderer.Insert(_renderer.HintText);
     }
 
     public void MoveCursorEnd()

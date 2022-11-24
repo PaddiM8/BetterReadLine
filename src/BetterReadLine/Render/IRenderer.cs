@@ -19,8 +19,14 @@ internal interface IRenderer
     bool CaretVisible { get; set; }
 
     string Text { get; set; }
-
+    
+    string? HintText { get; }
+    
+    bool IsEndOfLine { get; }
+    
     void OnHighlight(Func<string, string>? callback);
+    
+    void OnHint(Func<string, string?>? callback);
 
     void CaretUp();
     
@@ -38,5 +44,8 @@ internal interface IRenderer
 
     void Insert(string input);
 
+    void RenderText(bool includeHint = false);
+
     void WriteLinesOutside(string value, int rowCount, int lastLineLength);
+    
 }
