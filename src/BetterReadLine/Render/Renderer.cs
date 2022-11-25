@@ -18,11 +18,8 @@ internal class Renderer : IRenderer
 
     public int Caret
     {
-        get
-        {
-            return _caret;
-        }
-
+        get => _caret;
+        
         set
         {
             WriteRaw(IndexToMovement(value, out int newTop, out int newLeft));
@@ -35,10 +32,7 @@ internal class Renderer : IRenderer
 
     public bool CaretVisible
     {
-        get
-        {
-            return _caretVisible;
-        }
+        get => _caretVisible;
 
         set
         {

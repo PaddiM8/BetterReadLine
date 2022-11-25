@@ -37,6 +37,7 @@ public class KeyHandler
     internal IHintHandler? HintHandler
     {
         get => _hintHandler;
+        
         set
         {
             _hintHandler = value;
@@ -53,6 +54,7 @@ public class KeyHandler
     internal IHighlightHandler? HighlightHandler
     {
         get => _highlightHandler;
+        
         set
         {
             _highlightHandler = value;
@@ -65,6 +67,8 @@ public class KeyHandler
             _renderer.OnHighlight(value.Highlight);
         }
     }
+    
+    internal IEnterHandler? EnterHandler { get; set; }
 
     internal Action? OnEnter { get; set; }
 
@@ -124,10 +128,17 @@ public class KeyHandler
 
         if (OnEnter != null && keyInfo.Key == ConsoleKey.Enter)
         {
-            // TODO: Handle escaped new lines in the text argument parser (they should be ignored)
-            if ("\\|".Contains(_renderer.Text.LastOrDefault()))
+            /*if ("\\|".Contains(_renderer.Text.LastOrDefault()))
             {
                 _renderer.Insert("\n");
+            }*/
+            if (EnterHandler?.Handle(_renderer.Text, out string? newPromptText) is true)
+            {
+                if (newPromptText != null)
+                {
+                    _renderer.Text = newPromptText;
+                    _renderer.RenderText();
+                }
             }
             else
             {

@@ -13,6 +13,8 @@ public class ReadLine
     public IHighlightHandler? HighlightHandler { private get; set; }
     
     public IHintHandler? HintHandler { private get; set; }
+    
+    public IEnterHandler? EnterHandler { private get; set; }
 
     public char[]? WordSeparators { get; set; }
     
@@ -30,6 +32,7 @@ public class ReadLine
             AutoCompleteHandler = AutoCompletionHandler,
             HighlightHandler = HighlightHandler,
             HintHandler = HintHandler,
+            EnterHandler = EnterHandler,
             OnEnter = () => enterPressed = true,
         };
 
