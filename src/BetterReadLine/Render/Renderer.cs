@@ -222,6 +222,8 @@ internal class Renderer : IRenderer
         HintText = includeHint && _retrieveHint != null
             ? _retrieveHint!(Text)
             : null;
+        if (HintText?.Length == 0)
+            HintText = null;
         
         string movementToStart = IndexToMovement(0);
         var (top, left) = IndexToTopLeft(_text.Length);
@@ -329,43 +331,32 @@ internal class Renderer : IRenderer
     }
 
     private string IndexToMovement(int index)
-        => IndexToMovement(index, _top, _left, out int _, out int _);
+        => IndexToMovement(index, _top, out int _, out int _);
     
     private string IndexToMovement(int index, out int newTop, out int newLeft)
     {
-        string result = IndexToMovement(index, _top, _left, out int a, out int b);
+        string result = IndexToMovement(index, _top, out int a, out int b);
         newTop = a;
         newLeft = b;
 
         return result;
     }
 
-    private string IndexToMovement(int index, int originalTop, int originalLeft, out int newTop, out int newLeft)
+    private string IndexToMovement(int index, int originalTop, out int newTop, out int newLeft)
     {
         index = Math.Max(Math.Min(_text.Length, index), 0);
         (newTop, newLeft) = IndexToTopLeft(index);
-        var movement = new StringBuilder();
 
         int topDiff = newTop - originalTop;
-        if (topDiff > 0)
+        string verticalMovement = "";
+        if (topDiff != 0)
         {
-            movement.Append($"\x1b[{topDiff}B");
-        }
-        else if (topDiff < 0)
-        {
-            movement.Append($"\x1b[{Math.Abs(topDiff)}A");
-        }
-
-        int leftDiff = newLeft - originalLeft;
-        if (leftDiff > 0)
-        {
-            movement.Append($"\x1b[{leftDiff}C");
-        }
-        else if (leftDiff < 0)
-        {
-            movement.Append($"\x1b[{Math.Abs(leftDiff)}D");
+            verticalMovement = topDiff > 0
+                ? $"\x1b[{topDiff}B"
+                : $"\x1b[{Math.Abs(topDiff)}A";
         }
 
-        return movement.ToString();
+
+        return $"{verticalMovement}\x1b[{newLeft}G";
     }
 }
