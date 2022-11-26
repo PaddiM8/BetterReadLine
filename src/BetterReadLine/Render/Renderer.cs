@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using Wcwidth;
 
 namespace BetterReadLine.Render;
 
@@ -239,11 +240,6 @@ internal class Renderer : IRenderer
         if (HintText != null)
         {
             var (hintTop, _) = IndexToTopLeft(_text.Length + HintText.Length, Text + HintText);
-            /*hintHeight = HintText.Count(x => x == '\n');
-            string upMovement = hintHeight > 0
-                ? $"\x1b[{hintHeight}A"
-                : "";*/
-            //hintMovement = $"{upMovement}\x1b[{left + 1}G";
             hintHeight = hintTop - top;
             string upMovement = hintTop == top
                 ? ""
@@ -323,7 +319,7 @@ internal class Renderer : IRenderer
             }
             else
             {
-                left++;
+                left += UnicodeCalculator.GetWidth(text[i]);
             }
         }
 
@@ -357,6 +353,6 @@ internal class Renderer : IRenderer
         }
 
 
-        return $"{verticalMovement}\x1b[{newLeft}G";
+        return $"{verticalMovement}\x1b[{newLeft + 1}G";
     }
 }

@@ -18,4 +18,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Wcwidth" Version="1.0.0" />
+  </ItemGroup>
+
 </Project>

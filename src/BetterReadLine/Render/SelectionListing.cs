@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Wcwidth;
 
 namespace BetterReadLine.Render;
 
@@ -22,7 +23,7 @@ class SelectionListing
     public void LoadItems(IList<string> items)
     {
         _items = items;
-        _maxLength = items.Max(x => x.Length);
+        _maxLength = items.Max(x => x.GetWcLength());
     }
 
     public void Clear()
@@ -70,8 +71,9 @@ class SelectionListing
             for (int j = 0; j < columnCount; j++)
             {
                 int index = i * columnCount + j;
-                if (index < _items.Count && _items[index].Length > columnWidths[j])
-                    columnWidths[j] = _items[index].Length;
+                int length = _items[index].GetWcLength();
+                if (index < _items.Count && length > columnWidths[j])
+                    columnWidths[j] = length;
             }
         }
 
@@ -90,17 +92,8 @@ class SelectionListing
                 if (j != 0 && columnCount > 1)
                     output.Append(margin);
 
-                string content = _items[i * columnCount + j];
-                if (content.Length > _renderer.BufferWidth)
-                {
-                    // Unreasonably small terminal window, give up.
-                    if (content.Length <= 3)
-                        return;
-
-                    content = content[..(_renderer.BufferWidth - 3)] + "...";
-                }
-
-                string padding = new string(' ', columnWidths[j] - content.Length);
+                string content = _items[i * columnCount + j].WcTruncate(_renderer.BufferWidth);
+                string padding = new string(' ', columnWidths[j] - content.GetWcLength());
                 if (index == SelectedIndex)
                     content = $"\x1b[107m\x1b[30m{content}\x1b[0m";
 
