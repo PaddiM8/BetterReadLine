@@ -174,9 +174,9 @@ internal class Renderer : IRenderer
             Caret = pos;
     }
     
-    public void Insert(string input)
+    public void Insert(string input, bool includeHint)
     {
-        bool hasHint = _text.Length + input.Length > 0;
+        bool hasHint = includeHint && _text.Length + input.Length > 0;
         if (IsEndOfLine)
         {
             _text.Append(input);

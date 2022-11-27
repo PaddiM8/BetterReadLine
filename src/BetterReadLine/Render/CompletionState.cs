@@ -80,6 +80,6 @@ class CompletionState
     {
         _renderer.RemoveLeft(_renderer.Caret - _completionStart);
         _renderer.CaretVisible = false;
-        _renderer.Insert(_completions[_listing.SelectedIndex].CompletionText);
+        _renderer.Insert(_completions[_listing.SelectedIndex].CompletionText, includeHint: false);
     }
 }

@@ -42,7 +42,7 @@ internal interface IRenderer
 
     void RemoveRight(int count);
 
-    void Insert(string input);
+    void Insert(string input, bool includeHint);
 
     void RenderText(bool includeHint = false);
 

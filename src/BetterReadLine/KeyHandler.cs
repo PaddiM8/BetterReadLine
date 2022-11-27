@@ -194,7 +194,7 @@ public class KeyHandler
     {
         _renderer.Caret++;
         if (_renderer.IsEndOfLine && _renderer.HintText != null)
-            _renderer.Insert(_renderer.HintText);
+            _renderer.Insert(_renderer.HintText, includeHint: true);
     }
 
     public void MoveCursorEnd()
@@ -319,6 +319,6 @@ public class KeyHandler
 
     public void WriteChar(char c)
     {
-        _renderer.Insert(c.ToString());
+        _renderer.Insert(c.ToString(), includeHint: true);
     }
 }
