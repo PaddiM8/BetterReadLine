@@ -74,7 +74,6 @@ public class KeyHandler
 
     private IHighlightHandler? _highlightHandler;
     private IHintHandler? _hintHandler;
-    private ConsoleKeyInfo _keyInfo;
     private bool _wasEdited;
     private readonly Dictionary<KeyPress, Action> _defaultShortcuts;
     private readonly ShortcutBag? _shortcuts;
@@ -119,19 +118,13 @@ public class KeyHandler
         };
     }
 
-    internal void Handle(ConsoleKeyInfo keyInfo)
+    internal void Handle(ConsoleKeyInfo firstKey, string? remaining)
     {
-        _keyInfo = keyInfo;
-
-        if (_completionState.IsActive && _keyInfo.Key != ConsoleKey.Tab)
+        if (_completionState.IsActive && firstKey.Key != ConsoleKey.Tab)
             _completionState.Reset();
 
-        if (OnEnter != null && keyInfo.Key == ConsoleKey.Enter)
+        if (OnEnter != null && firstKey.Key == ConsoleKey.Enter)
         {
-            /*if ("\\|".Contains(_renderer.Text.LastOrDefault()))
-            {
-                _renderer.Insert("\n");
-            }*/
             if (EnterHandler?.Handle(_renderer.Text, out string? newPromptText) is true)
             {
                 if (newPromptText != null)
@@ -153,15 +146,31 @@ public class KeyHandler
             return;
         }
 
-        if (_shortcuts?.TryGetValue(new(keyInfo.Modifiers, keyInfo.Key), out var action1) ?? false)
+        if (_shortcuts?.TryGetValue(new(firstKey.Modifiers, firstKey.Key), out var action1) ?? false)
         {
             action1?.Invoke(this);
+
             return;
         }
         
-        _defaultShortcuts.TryGetValue(new(keyInfo.Modifiers, keyInfo.Key), out var action2);
-        action2 ??= WriteChar;
-        action2.Invoke();
+        _defaultShortcuts.TryGetValue(new(firstKey.Modifiers, firstKey.Key), out var action2);
+
+        if (action2 == null)
+        {
+            _wasEdited = true;
+
+            if (firstKey.KeyChar != '\0')
+                WriteChar(firstKey.KeyChar);
+        }
+        else
+        {
+            action2.Invoke();
+        }
+
+        if (remaining != null)
+        {
+            _renderer.Insert(remaining, includeHint: false);
+        }
     }
 
     public void Backspace()
@@ -307,14 +316,6 @@ public class KeyHandler
     public void TransposeChars()
     {
         // TODO: Implement TransposeChars
-    }
-
-    public void WriteChar()
-    {
-        _wasEdited = true;
-        
-        if (_keyInfo.KeyChar != '\0')
-            WriteChar(_keyInfo.KeyChar);
     }
 
     public void WriteChar(char c)

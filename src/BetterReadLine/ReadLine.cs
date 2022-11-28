@@ -41,7 +41,8 @@ public class ReadLine
 
         while (!enterPressed)
         {
-            _keyHandler.Handle(Console.ReadKey(true));
+            var (firstKey, remaining) = KeyReader.Read();
+            _keyHandler.Handle(firstKey, remaining);
         }
 
         string text = _keyHandler.Text;
