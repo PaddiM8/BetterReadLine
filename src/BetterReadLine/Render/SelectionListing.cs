@@ -71,8 +71,11 @@ class SelectionListing
             for (int j = 0; j < columnCount; j++)
             {
                 int index = i * columnCount + j;
+                if (index >= _items.Count)
+                    continue;
+
                 int length = _items[index].GetWcLength();
-                if (index < _items.Count && length > columnWidths[j])
+                if (length > columnWidths[j])
                     columnWidths[j] = length;
             }
         }
