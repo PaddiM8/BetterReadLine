@@ -125,13 +125,13 @@ public class KeyHandler
 
         if (OnEnter != null && firstKey.Key == ConsoleKey.Enter)
         {
-            if (EnterHandler?.Handle(_renderer.Text, out string? newPromptText) is true)
+            var enterHandlerResponse = EnterHandler?.Handle(_renderer.Text, _renderer.Caret);
+            if (enterHandlerResponse is { WasHandled: true, NewPromptText: not null })
             {
-                if (newPromptText != null)
-                {
-                    _renderer.Text = newPromptText;
-                    _renderer.RenderText();
-                }
+                _renderer.Text = enterHandlerResponse.NewPromptText;
+                _renderer.RenderText();
+                if (enterHandlerResponse.NewCaretPosition.HasValue)
+                    _renderer.Caret = enterHandlerResponse.NewCaretPosition.Value;
             }
             else
             {
@@ -152,20 +152,18 @@ public class KeyHandler
 
             return;
         }
-        
-        _defaultShortcuts.TryGetValue(new(firstKey.Modifiers, firstKey.Key), out var action2);
 
-        if (action2 == null)
-        {
-            _wasEdited = true;
-
-            if (firstKey.KeyChar != '\0')
-                WriteChar(firstKey.KeyChar);
-        }
-        else
+        if (_defaultShortcuts.TryGetValue(new(firstKey.Modifiers, firstKey.Key), out var action2))
         {
             action2.Invoke();
+
+            return;
         }
+
+        _wasEdited = true;
+
+        if (firstKey.KeyChar != '\0')
+            WriteChar(firstKey.KeyChar);
 
         if (remaining != null)
         {
